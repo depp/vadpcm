@@ -5,8 +5,6 @@
 
 #include <limits.h>
 
-#include <stdio.h>
-
 // Extend the sign bit of a 4-bit integer.
 static int vadpcm_ext4(int x) {
     return x > 7 ? x - 16 : x;
