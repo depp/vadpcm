@@ -1,62 +1,22 @@
-# Skelly 64
+# VADPCM
 
-Tools for Nintendo 64 homebrew game development.
+This is an implementation of the VADPCM codec. The VADPCM codec is often used by Nintendo 64 games—this includes both homebrew games made using [LibDragon][libdragon] and commercial games made during the 1990s and 2000s with the proprietary SDK, [LibUltra][libultra].
 
-This is a **work in progress.** If you want to use these tools, you will need to be able to able to figure things out by reading the source code.
+[libdragon]: https://github.com/DragonMinded/libdragon
+[libultra]: https://n64brew.dev/wiki/Libultra
 
-Note that if you are looking for **ROM hacking** tools, Skelly 64 won’t help you. ROM hacking is just too different from homebrew development.
+VADPCM is licensed under the terms of the Mozilla Public License Version 2.0. See LICENSE.txt for details.
 
-Skelly 64 is licensed under the terms of the Mozilla Public License Version 2.0. See LICENSE.txt for details.
+## Project Status
 
-## Tools
+The project is, as of September 2023, under active development. Version 1.0 is expected within the next six months.
 
-### Audio Converter
+## What is VADPCM?
 
-**Currently broken.**
+VADPCM is a variant of ADPCM. It encodes blocks of 16 samples of audio into 9 bytes of data, giving 4.5 bits per sample. There are no settings or parameters to change the bit rate; the bit rate is always 4.5 bits per sample.
 
-### Font Packer
+The audio quality of VADPCM is good, but this codec is not competitive with codecs like Opus, Vorbis, or even MP3.
 
-Converts a font to a bitmap that you can use on the Nintendo 64. Ordinary font files, like TrueType files, are rasterized (converted to bitmaps) and packed into textures.
+### Technical Details
 
-### Image Converter
-
-Converts an image to formats that you can use on the Nintendo 64.
-
-- Converts sRGB to linear RGB.
-
-- Creates mipmaps for textures.
-
-- Slices 2D images into strips that each fit into TMEM.
-
-### Model Converter
-
-Converts
-
-### ROM Creator
-
-Creates the bootsector of an Nintendo 64 ROM image.
-
-### Texture Display List Creator
-
-Creates a display list for mip-mapped textures.
-
-## Building
-
-Building requires the following prerequisites:
-
-- [Bazel](https://bazel.build/) 4.1.0 (You can try other versions, but you will need to change the .bazelversion file in order for other versions to work.)
-- [Pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
-- [SoX](http://sox.sourceforge.net/)
-- [AssImp](https://www.assimp.org/)
-
-### Development
-
-If you are making changes to Skelly 64, you should enable C++ compiler warnings. The easiest way to do this is by adding a file named `.user.bazelrc` to the top-level directory, containing the following configuration:
-
-    build --//bazel:warnings=error
-
-To update the Go dependencies:
-
-    go get -u ./...
-    go mod tidy
-    bazel run //:gazelle -- -from_file=go.mod
+VADPCM uses a codebook of second-order linear predictors, and encodes the residuals using 4 bits per sample. Each block of 16 samples shares the same predictor and scaling factor. The predictors in the codebook are stored in a vector format, which makes it easy to write a high-performance decoder using SIMD instructions. The Nintendo 64 has a coprocessor, called the Reality Signal Processor, with SIMD capabilities.
