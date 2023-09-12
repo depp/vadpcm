@@ -271,7 +271,8 @@ int main(int argc, char **argv) {
     (void)argc;
     (void)argv;
 
-    test_encoder();
+    test_autocorr();
+    test_solve();
     for (int i = 0; kAIFFNames[i] != NULL; i++) {
         test_file(kAIFFNames[i]);
     }

@@ -32,5 +32,8 @@ void test_reencode(const char *name, int predictor_count, int order,
                    struct vadpcm_vector *codebook, size_t frame_count,
                    const void *vadpcm);
 
-// Internal encoder tests.
-void test_encoder(void);
+// Autocorrelation test.
+void test_autocorr(void);
+
+// Predictor solver test.
+void test_solve(void);

@@ -4,12 +4,19 @@ load("//bazel:copts.bzl", "COPTS")
 cc_library(
     name = "codec",
     srcs = [
+        "autocorr.c",
+        "autocorr.h",
         "binary.c",
         "binary.h",
         "codebook.c",
         "decode.c",
         "encode.c",
+        "encode.h",
         "error.c",
+        "predictor.c",
+        "predictor.h",
+        "random.c",
+        "random.h",
     ],
     hdrs = [
         "vadpcm.h",
@@ -22,20 +29,18 @@ cc_test(
     name = "codec_test",
     size = "small",
     srcs = [
-        "binary.c",
-        "binary.h",
-        "codebook.c",
-        "decode.c",
-        "encode.c",
-        "error.c",
+        "decode_test.c",
+        "encode_test.c",
+        "predictor_test.c",
         "test.c",
         "test.h",
-        "vadpcm.h",
     ],
     copts = COPTS,
     data = [
         "data/sfx1.adpcm.aifc",
         "data/sfx1.pcm.aiff",
     ],
-    defines = ["TEST"],
+    deps = [
+        ":codec",
+    ],
 )

@@ -1,0 +1,71 @@
+// Copyright 2023 Dietrich Epp.
+// This file is part of VADPCM. VADPCM is licensed under the terms of the
+// Mozilla Public License, version 2.0. See LICENSE.txt for details.
+#pragma once
+
+// Linear predictor selection.
+//
+// This module generates a codebook of second-order linear predictors and
+// assigns a predictor to each block of audio. This is the only difficult part
+// of the encoder. The encoder does not operate on audio data, but instead
+
+#include <stddef.h>
+#include <stdint.h>
+
+// Calculate the square error, given an autocorrelation matrix and predictor
+// coefficients.
+inline float vadpcm_eval(const float corr[restrict static 6],
+                         const float coeff[restrict static 2]) {
+    return corr[0] +                               //
+           corr[2] * coeff[0] * coeff[0] +         //
+           corr[5] * coeff[1] * coeff[1] +         //
+           2.0f * (corr[4] * coeff[0] * coeff[1] - //
+                   corr[1] * coeff[0] -            //
+                   corr[3] * coeff[1]);
+}
+
+// Calculate the best-case error from a frame, given its solved coefficients.
+inline double vadpcm_eval_solved(const double corr[restrict static 6],
+                                 const double coeff[restrict static 2]) {
+    // Equivalent to vadpcm_eval(), for the case where coeff are optimal for
+    // this autocorrelation matrix.
+    //
+    // matrix = [k B^T]
+    //          [B A  ]
+    //
+    // solve(A, B) = A^-1 B
+    // eval(k, A, B, x) = k - 2B^T x + x^T A x
+    // eval(k, A, B, solve(A, B))
+    //   = eval(k, A, B, A^-1 B)
+    //   = k - 2B^T (A^-1 B) + (A^-1 B)^T A (A^-1 B)
+    //   = k - 2B^T A^-1 B + B^T A^-1^T A A^-1 B
+    //   = k - 2B^T A^-1 B + B^T A^-1^T B
+    //   = k - B^T A^-1 B
+    //   = k - B^T solve(A, B)
+    return corr[0] - corr[1] * coeff[0] - corr[3] * coeff[1];
+}
+
+// Calculate the best-case error for each frame, given the autocorrelation
+// matrixes.
+void vadpcm_best_error(size_t frame_count, const float (*restrict corr)[6],
+                       float *restrict best_error);
+
+// Get the mean autocorrelation matrix for each predictor. If the predictor for
+// a frame is out of range, that frame is ignored.
+void vadpcm_meancorrs(size_t frame_count, int predictor_count,
+                      const float (*restrict corr)[6],
+                      const uint8_t *restrict predictors,
+                      double (*restrict pcorr)[6], int *restrict count);
+
+// Calculate the predictor coefficients, given an autocorrelation matrix. The
+// coefficients are chosen to minimize vadpcm_eval.
+void vadpcm_solve(const double corr[restrict static 6],
+                  double coeff[restrict static 2]);
+
+// Assign a predictor to each frame. The predictors array should be initialized
+// to zero.
+void vadpcm_assign_predictors(size_t frame_count, int predictor_count,
+                              const float (*restrict corr)[6],
+                              const float *restrict best_error,
+                              float *restrict error,
+                              uint8_t *restrict predictors);
