@@ -1,6 +1,6 @@
-site_name: Skelly 64 Documentation
-site_url: https://depp.github.io/skelly64/
-repo_url: https://github.com/depp/skelly64/
+site_name: VADPCM Documentation
+site_url: https://depp.github.io/vadpcm/
+repo_url: https://github.com/depp/vadpcm/
 
 markdown_extensions:
   - admonition
@@ -11,18 +11,6 @@ theme:
 
 nav:
   - Introduction: index.md
-  - Building: building.md
-  - VADPCM Audio:
-    - Audio Overview: vadpcm/index.md
-    - Decode VADPCM: vadpcm/decode.md
-    - Encode VADPCM: vadpcm/encode.md
-    - VADPCM Codec: vadpcm/codec.md
-  - Font Builder:
-    - Overview: font/index.md
-    - TTF Example: font/ttf_example/index.md
-    - Bitmap Example: font/bitmap_example/index.md
-  - Image Converter: image.md
-  - Model Converter:
-    - Overview: model.md
-    - Format: model_format.md
-  - ROM Tool: rom.md
+  - Decode VADPCM: decode.md
+  - Encode VADPCM: encode.md
+  - VADPCM Codec: codec.md

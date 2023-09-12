@@ -1,25 +1,43 @@
 # Introduction
 
-Skelly 64 is a set of tools for creating assets for homebrew Nintendo 64 games.
+!!! info
 
-!!! warning
+    The VADPCM audio converter is **fully functional** but the API and command-line interface are subject to change.
 
-    This project is a work in progress. Skelly 64 is just not complete, or very usable yet. The tools were designed to be used in a game for the N64Brew Jam in 2020, and it will take time to document these tools, fix some bugs, and make them work for more general cases. While I’d like to make these tools usable for your project, these tools aren’t really ready yet! That’s why I’m creating these docs.
+VADPCM is a simple lossy audio compression codec used by Nintendo 64 games. VADPCM is one of two audio formats supported by the official Nintendo 64 SDK, and support for VADPCM is being added to LibDragon as well.
 
-    I’m looking forward to removing this section from the docs.
+## Tools and Libraries
 
-## Homebrew, or ROM Hack?
+The `vadpcm` tool encodes and decodes VADPCM audio from the command-line. To build it,
 
-Skelly 64 is only designed to help you create new homebrew games, it won’t help you make ROM hacks, it won't help you modify existing games, and it won't help you use textures or models from old Nintendo 64 games.
+```
+bazel build -c opt //tools/vadpcm
+```
 
-A **homebrew** game is a completely new game for the Nintendo 64, made long after the console was no longer supported. This means new code, new sound, new graphics.
+This will place the built executable at `bazel-bin/tools/vadpcm/vadpcm`.
 
-A **ROM hack** is a modification to an old Nintendo 64 game, like _Super Mario 64_ or _Ocarina of Time._
+The encoding and decoding library is found in `lib/vadpcm`.
 
-ROM hacks and homebrew games are just too different from each other. With homebrew games, you are free to design the game however you want, and Skelly 64 will help. However, if you are working on a ROM hack, you have to work with the existing formats used in old Nintendo 64 games. Skelly 64 does not support these formats, and support for these old formats will never be added.
+## Background
 
-## License
+In retail Nintendo 64 games, cartridge space was expensive, so VADPCM was primarily used for things like sound effects and musical instrument samples for MIDI playback. For homebrew games, cartridge space is much cheaper, and you can more easily justify using VADPCM to encode your entire soundtrack.
 
-The Skelly 64 project is licensed under the terms of the [Mozilla Public License v2.0][mpl].
+At least one retail Nintendo 64 game is known to use VADPCM audio for its soundtrack: _Star Wars, Shadows of the Empire_. From an article in [Game Developer, April 2009](https://www.gamedeveloper.com/console/classic-postmortem-i-star-wars-shadows-of-the-empire-i-),
 
-[mpl]: https://www.mozilla.org/en-US/MPL/2.0/
+> At this point, we tried an experiment using uncompressed digital samples of the Star Wars main theme. The quality was extremely good, even after subsequent compression with the ADPCM encoder provided by Nintendo. After a little persuasion, Nintendo generously agreed to increase the amount of cartridge space from 8MB to 12MB.
+
+> This allowed us to include approximately 15 minutes of 16-bit, 11khz, mono music that sounded surprisingly good. Considering that most users would listen to the music through their televisions (rather than a sophisticated audio system), the results were close to that of an audio CD, thereby justifying the extra cartridge space required.
+
+## Bit Rate
+
+Audio encoded in VADPCM uses exactly 4.5 bits per sample. The bit rate can only be changed by using a different sample rate.
+
+Here are some common sample rates, and the amount of data that VADPCM uses at each sample rate:
+
+| Sample Rate | Bit Rate    | Length per Megabyte |
+| ----------- | ----------- | ------------------- |
+| 44.1 kHz    | 198 kbit/s  | 42.3 s/MiB          |
+| 32 kHz      | 144 kbit/s  | 58.3 s/MiB          |
+| 22.05 kHz   | 99.2 kbit/s | 84.5 s/MiB          |
+| 16 kHz      | 72.0 kbit/s | 117 s/MiB           |
+| 11.025 kHz  | 49.6 kbit/s | 169 s/MiB           |
