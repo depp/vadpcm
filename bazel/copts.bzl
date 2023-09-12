@@ -39,26 +39,3 @@ COPTS = (
         "//bazel:warnings_error": _COPTS_WARNING + ["-Werror"],
     })
 )
-
-CXXOPTS_BASE = [
-    "-std=c++17",
-    "-D_DEFAULT_SOURCE",
-]
-
-_CXXOPTS_WARNING = [
-    "-Wall",
-    "-Wextra",
-    "-Wpointer-arith",
-    "-Wno-multichar",
-]
-
-# Internal C compilation options. Use this by default for all C targets in the
-# repo.
-CXXOPTS = (
-    CXXOPTS_BASE +
-    select({
-        "//bazel:warnings_off": [],
-        "//bazel:warnings_on": _CXXOPTS_WARNING,
-        "//bazel:warnings_error": _CXXOPTS_WARNING + ["-Werror"],
-    })
-)
