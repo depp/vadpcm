@@ -1,7 +1,7 @@
 // Copyright 2022 Dietrich Epp.
 // This file is part of Skelly 64. Skelly 64 is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
-#include "lib/vadpcm/vadpcm.h"
+#include "codec/vadpcm.h"
 
 #include <limits.h>
 
@@ -82,7 +82,7 @@ vadpcm_error vadpcm_decode(int predictor_count, int order,
 }
 
 #if TEST
-#include "lib/vadpcm/test.h"
+#include "codec/test.h"
 
 #include <stdio.h>
 #include <stdlib.h>

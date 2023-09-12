@@ -1,10 +1,10 @@
 // Copyright 2022 Dietrich Epp.
 // This file is part of Skelly 64. Skelly 64 is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
-#include "lib/vadpcm/test.h"
+#include "codec/test.h"
 
-#include "lib/vadpcm/binary.h"
-#include "lib/vadpcm/vadpcm.h"
+#include "codec/binary.h"
+#include "codec/vadpcm.h"
 
 #include <errno.h>
 #include <stdbool.h>
@@ -209,7 +209,7 @@ static void test_file(const char *name) {
     aiff.data.data = NULL;
 
     // Read PCM file.
-    snprintf(path, sizeof(path), "lib/vadpcm/data/%s.pcm.aiff", name);
+    snprintf(path, sizeof(path), "codec/data/%s.pcm.aiff", name);
     if (!read_aiff(&aiff, path)) {
         test_failure_count++;
         return;
@@ -223,7 +223,7 @@ static void test_file(const char *name) {
     aiff.data.data = NULL;
 
     // Read VADPCM file.
-    snprintf(path, sizeof(path), "lib/vadpcm/data/%s.adpcm.aifc", name);
+    snprintf(path, sizeof(path), "codec/data/%s.adpcm.aifc", name);
     if (!read_aiff(&aiff, path)) {
         test_failure_count++;
         goto done;

@@ -3,7 +3,7 @@
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #pragma once
 
-#include "lib/vadpcm/vadpcm.h"
+#include "codec/vadpcm.h"
 
 #include <stddef.h>
 #include <stdint.h>

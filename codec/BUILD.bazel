@@ -2,7 +2,7 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//bazel:copts.bzl", "COPTS")
 
 cc_library(
-    name = "vadpcm",
+    name = "codec",
     srcs = [
         "binary.c",
         "binary.h",
@@ -19,7 +19,7 @@ cc_library(
 )
 
 cc_test(
-    name = "vadpcm_test",
+    name = "codec_test",
     size = "small",
     srcs = [
         "binary.c",

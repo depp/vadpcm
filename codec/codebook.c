@@ -1,8 +1,8 @@
 // Copyright 2022 Dietrich Epp.
 // This file is part of Skelly 64. Skelly 64 is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
-#include "lib/vadpcm/binary.h"
-#include "lib/vadpcm/vadpcm.h"
+#include "codec/binary.h"
+#include "codec/vadpcm.h"
 
 enum {
     // The only supported version number for VADPCM data. This is also the only
