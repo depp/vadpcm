@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -73,7 +72,7 @@ var cmdDecode = cobra.Command{
 		}
 
 		// Read input.
-		data, err := ioutil.ReadFile(filein)
+		data, err := os.ReadFile(filein)
 		if err != nil {
 			return err
 		}
@@ -156,7 +155,7 @@ var cmdDecode = cobra.Command{
 		if err != nil {
 			return err
 		}
-		return ioutil.WriteFile(fileout, data, 0666)
+		return os.WriteFile(fileout, data, 0666)
 	},
 }
 
@@ -172,7 +171,7 @@ func readAudio(name string) (ad audioData, err error) {
 	default:
 		return ad, fmt.Errorf("input file has unknown extension: %q", ext)
 	}
-	data, err := ioutil.ReadFile(name)
+	data, err := os.ReadFile(name)
 	if err != nil {
 		return ad, err
 	}
@@ -253,7 +252,7 @@ var cmdEncode = cobra.Command{
 		if err != nil {
 			return err
 		}
-		return ioutil.WriteFile(fileout, data, 0666)
+		return os.WriteFile(fileout, data, 0666)
 	},
 }
 
