@@ -2,13 +2,11 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "vadpcm",
-    srcs = [
-        "vadpcm.go",
-    ],
+    srcs = ["vadpcm.go"],
     cdeps = [
-        "//lib/vadpcm",
+        "//codec",
     ],
     cgo = True,
-    importpath = "github.com/depp/skelly64/lib/audio/vadpcm",
+    importpath = "github.com/depp/vadpcm/lib/vadpcm",
     visibility = ["//visibility:public"],
 )

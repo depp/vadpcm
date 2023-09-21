@@ -1,7 +1,7 @@
 // Package vadpcm provides tools for working with VADPCM-encoded audio.
 package vadpcm
 
-// #include "lib/vadpcm/vadpcm.h"
+// #include "codec/vadpcm.h"
 // #include <stdlib.h>
 import "C"
 
