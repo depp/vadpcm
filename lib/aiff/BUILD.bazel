@@ -1,0 +1,11 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "aiff",
+    srcs = ["aiff.go"],
+    importpath = "github.com/depp/vadpcm/lib/aiff",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_depp_extended//:extended",
+    ],
+)
