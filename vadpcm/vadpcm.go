@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/depp/extended"
-	"github.com/depp/skelly64/lib/audio/aiff"
-	"github.com/depp/skelly64/lib/audio/vadpcm"
+	"github.com/depp/vadpcm/lib/aiff"
+	"github.com/depp/vadpcm/lib/vadpcm"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
