@@ -145,7 +145,7 @@ var cmdDecode = cobra.Command{
 				CompressionName: aiff.PCMName,
 			},
 			FormatVersion: aiff.FormatVersion{
-				aiff.StandardVersion,
+				Timestamp: aiff.StandardVersion,
 			},
 			Chunks: []aiff.Chunk{
 				&aiff.SoundData{Data: odata},
@@ -241,7 +241,7 @@ var cmdEncode = cobra.Command{
 				CompressionName: vadpcm.CompressionName,
 			},
 			FormatVersion: aiff.FormatVersion{
-				aiff.StandardVersion,
+				Timestamp: aiff.StandardVersion,
 			},
 			Chunks: []aiff.Chunk{
 				makeCodebookChunk(codebook),
