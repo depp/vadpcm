@@ -4,9 +4,9 @@
 #include "codec/encode.h"
 
 #include "codec/autocorr.h"
-#include "codec/vadpcm.h"
 #include "codec/predictor.h"
 #include "codec/random.h"
+#include "codec/vadpcm.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -79,10 +79,6 @@ static int vadpcm_getshift(int min, int max) {
         shift++;
     }
     return shift;
-}
-
-size_t vadpcm_encode_scratch_size(size_t frame_count) {
-    return frame_count * (sizeof(float) * 8 + 1);
 }
 
 // Encode audio as VADPCM, given the assignment of each frame to a predictor.
@@ -190,7 +186,7 @@ void vadpcm_encode_data(size_t frame_count, void *restrict dest,
 vadpcm_error vadpcm_encode(const struct vadpcm_params *restrict params,
                            struct vadpcm_vector *restrict codebook,
                            size_t frame_count, void *restrict dest,
-                           const int16_t *restrict src, void *scratch) {
+                           const int16_t *restrict src) {
     int predictor_count = params->predictor_count;
     if (predictor_count < 1 || kVADPCMMaxPredictorCount < predictor_count) {
         return kVADPCMErrInvalidParams;
@@ -202,33 +198,58 @@ vadpcm_error vadpcm_encode(const struct vadpcm_params *restrict params,
                sizeof(*codebook) * kVADPCMEncodeOrder * predictor_count);
     }
 
-    // Divide up scratch memory.
-    float(*restrict corr)[6];
-    float *restrict best_error;
-    float *restrict error;
-    uint8_t *restrict predictors;
-    {
-        char *ptr = scratch;
-        corr = (void *)ptr;
-        ptr += sizeof(*corr) * frame_count;
-        best_error = (void *)ptr;
-        ptr += sizeof(*best_error) * frame_count;
-        error = (void *)ptr;
-        ptr += sizeof(*error) * frame_count;
-        predictors = (void *)ptr;
+    // Scratch memory buffers.
+    float(*corr)[6] = NULL;
+    float *best_error = NULL, *error = NULL;
+    uint8_t *predictors = NULL;
+    if (frame_count > ((size_t)-1) / (sizeof(*corr))) {
+        return kVADPCMErrMemory;
     }
 
-    vadpcm_autocorr(frame_count, corr, src);
-    for (size_t i = 0; i < frame_count; i++) {
-        predictors[i] = 0;
+    // Get autocorrelation matrix for each frame.
+    corr = malloc(frame_count * sizeof(*corr));
+    if (corr == NULL) {
+        goto mem_error;
     }
+    predictors = malloc(frame_count);
+    if (predictors == NULL) {
+        goto mem_error;
+    }
+    vadpcm_autocorr(frame_count, corr, src);
+
+    // Assign predictors to each frame.
+    memset(predictors, 0, frame_count);
     if (predictor_count > 1) {
+        best_error = malloc(frame_count * sizeof(*best_error));
+        if (best_error == NULL) {
+            goto mem_error;
+        }
+        error = malloc(frame_count * sizeof(*error));
+        if (error == NULL) {
+            goto mem_error;
+        }
+
         vadpcm_best_error(frame_count, corr, best_error);
         vadpcm_assign_predictors(frame_count, predictor_count, corr, best_error,
                                  error, predictors);
+
+        free(error);
+        free(best_error);
     }
+
+    // Create optimal codebook, given predictor assignments. Then encode.
     vadpcm_make_codebook(frame_count, predictor_count, corr, predictors,
                          codebook);
     vadpcm_encode_data(frame_count, dest, src, predictors, codebook);
+
+    free(corr);
+    free(predictors);
     return 0;
+
+mem_error:
+    free(corr);
+    free(best_error);
+    free(error);
+    free(predictors);
+    return kVADPCMErrMemory;
 }

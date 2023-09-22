@@ -137,17 +137,13 @@ func Encode(params *Parameters, data []int16) (*Codebook, []byte, error) {
 		predictor_count: C.int(predictor_count),
 	}
 	vecs := make([]Vector, nvec)
-	scratchsz := C.vadpcm_encode_scratch_size(C.size_t(nframes))
-	scratch := C.malloc(scratchsz)
-	defer C.free(scratch)
 	dest := make([]byte, nframes*FrameByteSize)
 	err := C.vadpcm_encode(
 		&cparams,
 		(*C.struct_vadpcm_vector)(unsafe.Pointer(&vecs[0])),
 		C.size_t(nframes),
 		unsafe.Pointer(&dest[0]),
-		(*C.int16_t)(unsafe.Pointer(&data[0])),
-		unsafe.Pointer(scratch))
+		(*C.int16_t)(unsafe.Pointer(&data[0])))
 	if err != 0 {
 		return nil, nil, vadpcmerr(err)
 	}

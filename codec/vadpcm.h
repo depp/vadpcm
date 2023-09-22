@@ -34,6 +34,9 @@ typedef enum {
 
     // Invalid encoding parameters.
     kVADPCMErrInvalidParams,
+
+    // Memory allocation failed.
+    kVADPCMErrMemory,
 } vadpcm_error;
 
 // Return the short name of the VADPCM error code. Returns NULL for unknown
@@ -133,10 +136,6 @@ struct vadpcm_params {
     int predictor_count;
 };
 
-// Return the amount of scratch space needed to encode a file with the given
-// number of frames.
-size_t vadpcm_encode_scratch_size(size_t frame_count);
-
 // Encode PCM as VADPCM. The predictor order is kVADPCMEncodeOrder (2) and
 // cannot be changed.
 //
@@ -150,14 +149,13 @@ size_t vadpcm_encode_scratch_size(size_t frame_count);
 //   frame_count: Number of frames of VADPCM to encode
 //   dest: Output array of frame_count * kVADPCMFrameByteSize bytes
 //   src: Input array of frame_count * kVADPCMFrameSampleCount elements
-//   scratch: Scratch space with size vadpcm_encode_scratch_size(frame_count)
 //
 // Error codes:
 //   kVADPCMErrInvalidParams: Invalid encoding parameters.
 vadpcm_error vadpcm_encode(const struct vadpcm_params *VADPCM_RESTRICT params,
                            struct vadpcm_vector *VADPCM_RESTRICT codebook,
                            size_t frame_count, void *VADPCM_RESTRICT dest,
-                           const int16_t *VADPCM_RESTRICT src, void *scratch);
+                           const int16_t *VADPCM_RESTRICT src);
 
 #ifdef __cplusplus
 }

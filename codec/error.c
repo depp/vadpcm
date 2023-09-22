@@ -17,6 +17,8 @@ const char *vadpcm_error_name(vadpcm_error err) {
         return "unknown VADPCM version";
     case kVADPCMErrInvalidParams:
         return "invalid encoding parameters";
+    case kVADPCMErrMemory:
+        return "memory allocation failed";
     }
     return 0;
 }
