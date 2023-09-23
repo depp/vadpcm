@@ -15,6 +15,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 type fileError struct {
@@ -187,6 +188,15 @@ func readAudio(name string) (ad audioData, err error) {
 	return ad, nil
 }
 
+func padAudio(samples []int16) []int16 {
+	nvframes := (len(samples) + vadpcm.FrameSampleCount - 1) / vadpcm.FrameSampleCount
+	nframes := nvframes * vadpcm.FrameSampleCount
+	if len(samples) < nframes {
+		samples = append(samples, make([]int16, nframes-len(samples))...)
+	}
+	return samples
+}
+
 func makeCodebookChunk(codebook *vadpcm.Codebook) *aiff.VADPCMCodes {
 	table := make([]int16, vadpcm.VectorSize*codebook.Order*codebook.PredictorCount)
 	for i, v := range codebook.Vectors {
@@ -221,11 +231,7 @@ var cmdEncode = cobra.Command{
 		if err != nil {
 			return err
 		}
-		nvframes := (len(ad.samples) + vadpcm.FrameSampleCount - 1) / vadpcm.FrameSampleCount
-		nframes := nvframes * vadpcm.FrameSampleCount
-		if len(ad.samples) < nframes {
-			ad.samples = append(ad.samples, make([]int16, nframes-len(ad.samples))...)
-		}
+		ad.samples = padAudio(ad.samples)
 		codebook, vdata, stats, err := vadpcm.Encode(&vadpcm.Parameters{
 			PredictorCount: flagPredictorCount,
 		}, ad.samples)
@@ -240,7 +246,7 @@ var cmdEncode = cobra.Command{
 		o := aiff.AIFF{
 			Common: aiff.Common{
 				NumChannels:     1,
-				NumFrames:       nframes,
+				NumFrames:       len(ad.samples) / vadpcm.FrameSampleCount,
 				SampleSize:      16,
 				SampleRate:      ad.rate,
 				Compression:     *(*[4]byte)([]byte(vadpcm.CompressionType)),
@@ -263,10 +269,18 @@ var cmdEncode = cobra.Command{
 }
 
 func main() {
-	cmdRoot.AddCommand(&cmdDecode, &cmdEncode)
-	f := cmdEncode.Flags()
-	f.IntVar(&flagPredictorCount, "predictor-count", 4,
+	cmdRoot.AddCommand(&cmdDecode, &cmdEncode, &cmdTest)
+	cmdTest.AddCommand(&cmdTestStats)
+
+	fencode := pflag.NewFlagSet("encoding", pflag.ExitOnError)
+	fencode.IntVar(&flagPredictorCount, "predictor-count", 4,
 		"number of VADPCM predictors, 1-16")
+
+	f := cmdEncode.Flags()
+	f.AddFlagSet(fencode)
+	f = cmdTestStats.Flags()
+	f.AddFlagSet(fencode)
+
 	if err := cmdRoot.Execute(); err != nil {
 		logrus.Error(err)
 		os.Exit(1)

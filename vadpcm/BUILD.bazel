@@ -8,14 +8,19 @@ go_binary(
 
 go_library(
     name = "vadpcm_lib",
-    srcs = ["vadpcm.go"],
+    srcs = [
+        "tests.go",
+        "vadpcm.go",
+    ],
     importpath = "github.com/depp/vadpcm/vadpcm",
     visibility = ["//visibility:private"],
     deps = [
         "//lib/aiff",
+        "//lib/parallel",
         "//lib/vadpcm",
         "@com_github_depp_extended//:extended",
         "@com_github_sirupsen_logrus//:logrus",
         "@com_github_spf13_cobra//:cobra",
+        "@com_github_spf13_pflag//:pflag",
     ],
 )
