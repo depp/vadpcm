@@ -7,9 +7,11 @@
 #include <stdint.h>
 
 struct vadpcm_vector;
+struct vadpcm_stats;
 
 // Encode audio as VADPCM, given the assignment of each frame to a predictor.
 void vadpcm_encode_data(size_t frame_count, void *restrict dest,
                         const int16_t *restrict src,
                         const uint8_t *restrict predictors,
-                        const struct vadpcm_vector *restrict codebook);
+                        const struct vadpcm_vector *restrict codebook,
+                        struct vadpcm_stats *restrict stats);

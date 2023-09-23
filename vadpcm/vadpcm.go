@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -225,12 +226,17 @@ var cmdEncode = cobra.Command{
 		if len(ad.samples) < nframes {
 			ad.samples = append(ad.samples, make([]int16, nframes-len(ad.samples))...)
 		}
-		codebook, vdata, err := vadpcm.Encode(&vadpcm.Parameters{
+		codebook, vdata, stats, err := vadpcm.Encode(&vadpcm.Parameters{
 			PredictorCount: flagPredictorCount,
 		}, ad.samples)
 		if err != nil {
 			return err
 		}
+		sigLevel := 10.0 * math.Log10(stats.SignalMeanSquare)
+		errLevel := 10.0 * math.Log10(stats.ErrorMeanSquare)
+		logrus.Infof("Signal level: %.2f dB", sigLevel)
+		logrus.Infof("Error level: %.2f dB", errLevel)
+		logrus.Infof("SNR: %.2f dB", errLevel-sigLevel)
 		o := aiff.AIFF{
 			Common: aiff.Common{
 				NumChannels:     1,

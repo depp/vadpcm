@@ -85,16 +85,26 @@ static int vadpcm_getshift(int min, int max) {
 void vadpcm_encode_data(size_t frame_count, void *restrict dest,
                         const int16_t *restrict src,
                         const uint8_t *restrict predictors,
-                        const struct vadpcm_vector *restrict codebook) {
+                        const struct vadpcm_vector *restrict codebook,
+                        struct vadpcm_stats *restrict stats) {
     uint32_t rng_state = 0;
     uint8_t *destptr = dest;
     int state[4];
     state[0] = 0;
     state[1] = 0;
+    stats->signal_mean_square = 0.0;
+    stats->error_mean_square = 0.0;
     for (size_t frame = 0; frame < frame_count; frame++) {
         unsigned predictor = predictors[frame];
         const struct vadpcm_vector *restrict pvec = codebook + 2 * predictor;
         int accumulator[8], s0, s1, s, a, r, min, max;
+
+        double sum_square = 0.0;
+        for (int i = 0; i < kVADPCMFrameSampleCount; i++) {
+            double value = (double)src[frame * 16 + i];
+            sum_square += value * value;
+        }
+        stats->signal_mean_square += sum_square;
 
         // Calculate the residual with full precision, and figure out the
         // scaling factor necessary to encode it.
@@ -180,13 +190,19 @@ void vadpcm_encode_data(size_t frame_count, void *restrict dest,
         }
         state[0] = state[2];
         state[1] = state[3];
+        stats->error_mean_square += best_error;
     }
+    double factor = 1.0 / ((double)(frame_count * kVADPCMFrameSampleCount) *
+                           (32768.0 * 32768.0));
+    stats->signal_mean_square *= factor;
+    stats->error_mean_square *= factor;
 }
 
 vadpcm_error vadpcm_encode(const struct vadpcm_params *restrict params,
                            struct vadpcm_vector *restrict codebook,
                            size_t frame_count, void *restrict dest,
-                           const int16_t *restrict src) {
+                           const int16_t *restrict src,
+                           struct vadpcm_stats *stats) {
     int predictor_count = params->predictor_count;
     if (predictor_count < 1 || kVADPCMMaxPredictorCount < predictor_count) {
         return kVADPCMErrInvalidParams;
@@ -196,6 +212,11 @@ vadpcm_error vadpcm_encode(const struct vadpcm_params *restrict params,
     if (frame_count == 0) {
         memset(codebook, 0,
                sizeof(*codebook) * kVADPCMEncodeOrder * predictor_count);
+        if (stats != NULL) {
+            stats->signal_mean_square = 0.0;
+            stats->error_mean_square = 0.0;
+        }
+        return 0;
     }
 
     // Scratch memory buffers.
@@ -240,7 +261,9 @@ vadpcm_error vadpcm_encode(const struct vadpcm_params *restrict params,
     // Create optimal codebook, given predictor assignments. Then encode.
     vadpcm_make_codebook(frame_count, predictor_count, corr, predictors,
                          codebook);
-    vadpcm_encode_data(frame_count, dest, src, predictors, codebook);
+    struct vadpcm_stats stats_buf;
+    vadpcm_encode_data(frame_count, dest, src, predictors, codebook,
+                       stats != NULL ? stats : &stats_buf);
 
     free(corr);
     free(predictors);

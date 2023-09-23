@@ -136,6 +136,16 @@ struct vadpcm_params {
     int predictor_count;
 };
 
+// Statistics about the VADPCM encoding.
+struct vadpcm_stats {
+    // The mean of the square of the original input signal.
+    double signal_mean_square;
+
+    // The mean of the square of the encoding error (the difference between the
+    // original signal and the encoded signal).
+    double error_mean_square;
+};
+
 // Encode PCM as VADPCM. The predictor order is kVADPCMEncodeOrder (2) and
 // cannot be changed.
 //
@@ -149,13 +159,15 @@ struct vadpcm_params {
 //   frame_count: Number of frames of VADPCM to encode
 //   dest: Output array of frame_count * kVADPCMFrameByteSize bytes
 //   src: Input array of frame_count * kVADPCMFrameSampleCount elements
+//   stats: If not NULL, this will be filled with stats about the encoding
 //
 // Error codes:
 //   kVADPCMErrInvalidParams: Invalid encoding parameters.
 vadpcm_error vadpcm_encode(const struct vadpcm_params *VADPCM_RESTRICT params,
                            struct vadpcm_vector *VADPCM_RESTRICT codebook,
                            size_t frame_count, void *VADPCM_RESTRICT dest,
-                           const int16_t *VADPCM_RESTRICT src);
+                           const int16_t *VADPCM_RESTRICT src,
+                           struct vadpcm_stats *stats);
 
 #ifdef __cplusplus
 }

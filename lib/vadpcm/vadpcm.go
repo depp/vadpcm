@@ -112,14 +112,20 @@ type Parameters struct {
 	PredictorCount int
 }
 
+// A Stats contains the statistics about how audio was encoded.
+type Stats struct {
+	SignalMeanSquare float64
+	ErrorMeanSquare  float64
+}
+
 // Encode encodes audio as VADPCM.
-func Encode(params *Parameters, data []int16) (*Codebook, []byte, error) {
+func Encode(params *Parameters, data []int16) (*Codebook, []byte, *Stats, error) {
 	predictor_count := params.PredictorCount
 	if predictor_count < 0 {
-		return nil, nil, fmt.Errorf("invalid predictory count: %d", predictor_count)
+		return nil, nil, nil, fmt.Errorf("invalid predictor count: %d", predictor_count)
 	}
 	if MaxPredictorCount < predictor_count {
-		return nil, nil, fmt.Errorf("predictor count is too large: %d", predictor_count)
+		return nil, nil, nil, fmt.Errorf("predictor count is too large: %d", predictor_count)
 	}
 	nframes := len(data) / FrameSampleCount
 	nvec := predictor_count * EncodeOrder
@@ -128,28 +134,33 @@ func Encode(params *Parameters, data []int16) (*Codebook, []byte, error) {
 			Order:          EncodeOrder,
 			PredictorCount: predictor_count,
 			Vectors:        make([]Vector, nvec),
-		}, nil, nil
+		}, nil, &Stats{}, nil
 	}
 	if predictor_count == 0 {
-		return nil, nil, errors.New("predictor count is zero")
+		return nil, nil, nil, errors.New("predictor count is zero")
 	}
 	cparams := C.struct_vadpcm_params{
 		predictor_count: C.int(predictor_count),
 	}
 	vecs := make([]Vector, nvec)
 	dest := make([]byte, nframes*FrameByteSize)
+	var stats C.struct_vadpcm_stats
 	err := C.vadpcm_encode(
 		&cparams,
 		(*C.struct_vadpcm_vector)(unsafe.Pointer(&vecs[0])),
 		C.size_t(nframes),
 		unsafe.Pointer(&dest[0]),
-		(*C.int16_t)(unsafe.Pointer(&data[0])))
+		(*C.int16_t)(unsafe.Pointer(&data[0])),
+		&stats)
 	if err != 0 {
-		return nil, nil, vadpcmerr(err)
+		return nil, nil, nil, vadpcmerr(err)
 	}
 	return &Codebook{
-		Order:          EncodeOrder,
-		PredictorCount: predictor_count,
-		Vectors:        vecs,
-	}, dest, nil
+			Order:          EncodeOrder,
+			PredictorCount: predictor_count,
+			Vectors:        vecs,
+		}, dest, &Stats{
+			SignalMeanSquare: float64(stats.signal_mean_square),
+			ErrorMeanSquare:  float64(stats.error_mean_square),
+		}, nil
 }
