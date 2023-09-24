@@ -8,6 +8,19 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
+// A record of the predictor error if a frame is encoded with a given predictor.
+struct vadpcm_error_record {
+    int predictor;
+    float error;
+};
+
+// Scratch data for a frame when assigning predictors.
+struct vadpcm_scratch {
+    struct vadpcm_error_record p[2];
+};
 
 enum {
     // Iterations for predictor assignment.
@@ -218,11 +231,22 @@ static size_t vadpcm_worst_frame(size_t frame_count,
     return best_index;
 }
 
-void vadpcm_assign_predictors(size_t frame_count, int predictor_count,
-                              const float (*restrict corr)[6],
-                              const float *restrict best_error,
-                              float *restrict error,
-                              uint8_t *restrict predictors) {
+vadpcm_error vadpcm_assign_predictors(size_t frame_count, int predictor_count,
+                                      const float (*restrict corr)[6],
+                                      uint8_t *restrict predictors) {
+    memset(predictors, 0, predictor_count);
+    if (predictor_count <= 1) {
+        return 0;
+    }
+    float *best_error = malloc(frame_count * sizeof(*best_error));
+    if (best_error == NULL) {
+        return kVADPCMErrMemory;
+    }
+    float *error = malloc(frame_count * sizeof(*best_error));
+    if (error == NULL) {
+        free(best_error);
+        return kVADPCMErrMemory;
+    }
     int unassigned = predictor_count;
     int active_count = 1;
     for (int iter = 0; iter < kVADPCMIterations; iter++) {
@@ -236,4 +260,7 @@ void vadpcm_assign_predictors(size_t frame_count, int predictor_count,
         unassigned = vadpcm_refine_predictors(frame_count, active_count, corr,
                                               error, predictors);
     }
+    free(best_error);
+    free(error);
+    return 0;
 }

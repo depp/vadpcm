@@ -221,7 +221,6 @@ vadpcm_error vadpcm_encode(const struct vadpcm_params *restrict params,
 
     // Scratch memory buffers.
     float(*corr)[6] = NULL;
-    float *best_error = NULL, *error = NULL;
     uint8_t *predictors = NULL;
     if (frame_count > ((size_t)-1) / (sizeof(*corr))) {
         return kVADPCMErrMemory;
@@ -230,49 +229,31 @@ vadpcm_error vadpcm_encode(const struct vadpcm_params *restrict params,
     // Get autocorrelation matrix for each frame.
     corr = malloc(frame_count * sizeof(*corr));
     if (corr == NULL) {
-        goto mem_error;
+        return kVADPCMErrMemory;
     }
     predictors = malloc(frame_count);
     if (predictors == NULL) {
-        goto mem_error;
+        free(corr);
+        return kVADPCMErrMemory;
     }
     vadpcm_autocorr(frame_count, corr, src);
 
     // Assign predictors to each frame.
-    memset(predictors, 0, frame_count);
-    if (predictor_count > 1) {
-        best_error = malloc(frame_count * sizeof(*best_error));
-        if (best_error == NULL) {
-            goto mem_error;
-        }
-        error = malloc(frame_count * sizeof(*error));
-        if (error == NULL) {
-            goto mem_error;
-        }
+    vadpcm_error err = vadpcm_assign_predictors(frame_count, predictor_count,
+                                                corr, predictors);
 
-        vadpcm_best_error(frame_count, corr, best_error);
-        vadpcm_assign_predictors(frame_count, predictor_count, corr, best_error,
-                                 error, predictors);
+    if (err == 0) {
+        // Create optimal codebook, given predictor assignments.
+        vadpcm_make_codebook(frame_count, predictor_count, corr, predictors,
+                             codebook);
 
-        free(error);
-        free(best_error);
+        // Encode.
+        struct vadpcm_stats stats_buf;
+        vadpcm_encode_data(frame_count, dest, src, predictors, codebook,
+                           stats != NULL ? stats : &stats_buf);
     }
 
-    // Create optimal codebook, given predictor assignments. Then encode.
-    vadpcm_make_codebook(frame_count, predictor_count, corr, predictors,
-                         codebook);
-    struct vadpcm_stats stats_buf;
-    vadpcm_encode_data(frame_count, dest, src, predictors, codebook,
-                       stats != NULL ? stats : &stats_buf);
-
     free(corr);
     free(predictors);
-    return 0;
-
-mem_error:
-    free(corr);
-    free(best_error);
-    free(error);
-    free(predictors);
-    return kVADPCMErrMemory;
+    return err;
 }

@@ -8,6 +8,9 @@
 // This module generates a codebook of second-order linear predictors and
 // assigns a predictor to each block of audio. This is the only difficult part
 // of the encoder. The encoder does not operate on audio data, but instead
+// operates on the autocorrelation matrix for each frame of 16 audio samples.
+
+#include "codec/vadpcm.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -62,10 +65,7 @@ void vadpcm_meancorrs(size_t frame_count, int predictor_count,
 void vadpcm_solve(const double corr[restrict static 6],
                   double coeff[restrict static 2]);
 
-// Assign a predictor to each frame. The predictors array should be initialized
-// to zero.
-void vadpcm_assign_predictors(size_t frame_count, int predictor_count,
-                              const float (*restrict corr)[6],
-                              const float *restrict best_error,
-                              float *restrict error,
-                              uint8_t *restrict predictors);
+// Assign a predictor to each frame.
+vadpcm_error vadpcm_assign_predictors(size_t frame_count, int predictor_count,
+                                      const float (*restrict corr)[6],
+                                      uint8_t *restrict predictors);
