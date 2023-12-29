@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "e6b856eeebfc6b8ab7b0ddb7b6505759a7d6e9cfb6cc0edaf06ae0426b964d0a",
+  "moduleFileHash": "234f8918d938e2c201852e0263170a2c5ad0ba1c5c404afde361e97bdb0efdaa",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -63,7 +63,6 @@
           },
           "imports": {
             "com_github_depp_extended": "com_github_depp_extended",
-            "com_github_sirupsen_logrus": "com_github_sirupsen_logrus",
             "com_github_spf13_cobra": "com_github_spf13_cobra",
             "com_github_spf13_pflag": "com_github_spf13_pflag"
           },
@@ -1075,9 +1074,9 @@
       "general": {
         "bzlTransitiveDigest": "zP01muRk4s4xWGK3gNPXOyDMQkOPsIhu99akeKWFFQ0=",
         "accumulatedFileDigests": {
-          "@@//:go.mod": "07fc820749305a28159c9dab08caf169ced257042882bae9f6ad8233728013db",
+          "@@//:go.mod": "0a096b03dff474980ffd638b5e2b286c899669b97adfd60d9ece827dd4a9758a",
           "@@rules_go~0.44.0//:go.mod": "15454724af1504c4ce1782c2a7f423d596a1d8490125eb7c5bd9c95fea1991f0",
-          "@@//:go.sum": "b5a0374be313aa8b7ffb04aab177ca3fa2ec27879ae71bf666b8392800b71786",
+          "@@//:go.sum": "e33063aaf32b9f862f74a594518dd7fe8b64447ed8e80f504b9f01199a010358",
           "@@gazelle~0.35.0//:go.mod": "48dc6e771c3028ee1c18b9ffc81e596fd5f6d7e0016c5ef280e30f2821f60473",
           "@@rules_go~0.44.0//:go.sum": "b5938730bf7d3581421928b0385d99648dd9634becead96fca0594ac491b2f49",
           "@@gazelle~0.35.0//:go.sum": "7c4460e8ecb5dd8691a51d4fa2e9e4751108b933636497ce46db499fc2e7a88d"
@@ -1194,22 +1193,6 @@
               "sum": "h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=",
               "replace": "",
               "version": "v1.0.0"
-            }
-          },
-          "com_github_sirupsen_logrus": {
-            "bzlFile": "@@gazelle~0.35.0//internal:go_repository.bzl",
-            "ruleClassName": "go_repository",
-            "attributes": {
-              "name": "gazelle~0.35.0~go_deps~com_github_sirupsen_logrus",
-              "importpath": "github.com/sirupsen/logrus",
-              "build_directives": [],
-              "build_file_generation": "auto",
-              "build_extra_args": [],
-              "patches": [],
-              "patch_args": [],
-              "sum": "h1:dueUQJ1C2q9oE3F7wvmSGAaVtTmUizReu6fjN8uqzbQ=",
-              "replace": "",
-              "version": "v1.9.3"
             }
           },
           "org_golang_x_tools": {
@@ -1479,11 +1462,9 @@
               "name": "gazelle~0.35.0~go_deps~bazel_gazelle_go_repository_config",
               "importpaths": {
                 "com_github_depp_extended": "github.com/depp/extended",
-                "com_github_sirupsen_logrus": "github.com/sirupsen/logrus",
                 "com_github_spf13_cobra": "github.com/spf13/cobra",
                 "com_github_spf13_pflag": "github.com/spf13/pflag",
                 "com_github_inconshreveable_mousetrap": "github.com/inconshreveable/mousetrap",
-                "org_golang_x_sys": "golang.org/x/sys",
                 "com_github_gogo_protobuf": "github.com/gogo/protobuf",
                 "com_github_golang_mock": "github.com/golang/mock",
                 "com_github_golang_protobuf": "github.com/golang/protobuf",
@@ -1494,6 +1475,7 @@
                 "org_golang_google_grpc_cmd_protoc_gen_go_grpc": "google.golang.org/grpc/cmd/protoc-gen-go-grpc",
                 "org_golang_google_protobuf": "google.golang.org/protobuf",
                 "org_golang_x_mod": "golang.org/x/mod",
+                "org_golang_x_sys": "golang.org/x/sys",
                 "org_golang_x_text": "golang.org/x/text",
                 "org_golang_google_genproto_googleapis_rpc": "google.golang.org/genproto/googleapis/rpc",
                 "com_github_bazelbuild_buildtools": "github.com/bazelbuild/buildtools",
@@ -1533,7 +1515,6 @@
         "moduleExtensionMetadata": {
           "explicitRootModuleDirectDeps": [
             "com_github_depp_extended",
-            "com_github_sirupsen_logrus",
             "com_github_spf13_cobra",
             "com_github_spf13_pflag"
           ],

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/csv"
 	"errors"
+	"log/slog"
 	"math"
 	"os"
 	"strconv"
@@ -11,7 +12,6 @@ import (
 	"github.com/depp/vadpcm/lib/parallel"
 	"github.com/depp/vadpcm/lib/vadpcm"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +38,7 @@ var cmdTestStats = cobra.Command{
 			s, err := getStats(args[i])
 			if err != nil {
 				atomic.AddUint64(&errcount, 1)
-				logrus.Error(err)
+				slog.Error(err.Error())
 				return
 			}
 			stats[i] = s

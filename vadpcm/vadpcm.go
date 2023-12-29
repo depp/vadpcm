@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"log/slog"
 	"math"
 	"os"
 	"path/filepath"
@@ -13,7 +14,6 @@ import (
 	"github.com/depp/vadpcm/lib/aiff"
 	"github.com/depp/vadpcm/lib/vadpcm"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -61,7 +61,7 @@ var cmdDecode = cobra.Command{
 		filein := args[0]
 		fileout := args[1]
 		if ext := filepath.Ext(filein); !strings.EqualFold(ext, ".aifc") {
-			logrus.Warn("input file does not have .aifc extension")
+			slog.Warn("input file does not have .aifc extension", "file", filein)
 		}
 		var kind aiff.Kind
 		switch ext := filepath.Ext(fileout); {
@@ -114,7 +114,7 @@ var cmdDecode = cobra.Command{
 		nvframes := a.Common.NumFrames / vadpcm.FrameSampleCount
 		nframes := nvframes * vadpcm.FrameSampleCount
 		if nframes != a.Common.NumFrames {
-			logrus.Warnf("AIFF numSampleFrames is %d, which is not divisible by %d", a.Common.NumFrames, vadpcm.FrameSampleCount)
+			slog.Warn(fmt.Sprintf("AIFF numSampleFrames is %d, which is not divisible by %d", a.Common.NumFrames, vadpcm.FrameSampleCount))
 		}
 		var vdata []byte
 		if nvframes > 0 {
@@ -220,7 +220,7 @@ var cmdEncode = cobra.Command{
 		filein := args[0]
 		fileout := args[1]
 		if ext := filepath.Ext(fileout); !strings.EqualFold(ext, ".aifc") {
-			logrus.Warn("output file does not have .aifc extension")
+			slog.Warn("output file does not have .aifc extension", "file", fileout)
 		}
 		if flagPredictorCount < 1 || vadpcm.MaxPredictorCount < flagPredictorCount {
 			return fmt.Errorf("parameter count is not in the range 1-16: %d", flagPredictorCount)
@@ -240,9 +240,9 @@ var cmdEncode = cobra.Command{
 		}
 		sigLevel := 10.0 * math.Log10(stats.SignalMeanSquare)
 		errLevel := 10.0 * math.Log10(stats.ErrorMeanSquare)
-		logrus.Infof("Signal level: %.2f dB", sigLevel)
-		logrus.Infof("Error level: %.2f dB", errLevel)
-		logrus.Infof("SNR: %.2f dB", errLevel-sigLevel)
+		slog.Info(fmt.Sprintf("Signal level: %.2f dB", sigLevel))
+		slog.Info(fmt.Sprintf("Error level: %.2f dB", errLevel))
+		slog.Info(fmt.Sprintf("SNR: %.2f dB", errLevel-sigLevel))
 		o := aiff.AIFF{
 			Common: aiff.Common{
 				NumChannels:     1,
@@ -282,7 +282,7 @@ func main() {
 	f.AddFlagSet(fencode)
 
 	if err := cmdRoot.Execute(); err != nil {
-		logrus.Error(err)
+		slog.Error(err.Error())
 		os.Exit(1)
 	}
 }
