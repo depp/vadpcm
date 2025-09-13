@@ -20,3 +20,9 @@ The audio quality of VADPCM is good, but this codec is not competitive with code
 ### Technical Details
 
 VADPCM uses a codebook of second-order linear predictors, and encodes the residuals using 4 bits per sample. Each block of 16 samples shares the same predictor and scaling factor. The predictors in the codebook are stored in a vector format, which makes it easy to write a high-performance decoder using SIMD instructions. The Nintendo 64 has a coprocessor, called the Reality Signal Processor, with SIMD capabilities.
+
+## Development
+
+Generate the `compile_commands.json` file:
+
+    bazel run @hedron_compile_commands//:refresh_all

@@ -3,6 +3,15 @@ bazel_dep(name = "rules_cc", version = "0.2.8")
 bazel_dep(name = "rules_go", version = "0.57.0")
 bazel_dep(name = "gazelle", version = "0.45.0")
 
+# Hedron's Compile Commands Extractor for Bazel
+# https://github.com/hedronvision/bazel-compile-commands-extractor
+bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
+git_override(
+    module_name = "hedron_compile_commands",
+    remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git",
+    commit = "abb61a688167623088f8768cc9264798df6a9d10",
+)
+
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk")
 go_sdk.download(version = "1.25.1")
 
