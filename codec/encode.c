@@ -220,7 +220,7 @@ vadpcm_error vadpcm_encode(const struct vadpcm_params *restrict params,
     }
 
     // Scratch memory buffers.
-    float(*corr)[6] = NULL;
+    float (*corr)[6] = NULL;
     uint8_t *predictors = NULL;
     if (frame_count > ((size_t)-1) / (sizeof(*corr))) {
         return kVADPCMErrMemory;
