@@ -33,6 +33,10 @@ def convert_to_wav(
         # Resample
         "-ar",
         str(rate),
+        # Specify desired sample format explicitly, even though FFmpeg seems to
+        # use this by default.
+        "-sample_fmt",
+        "s16",
         # Output
         output_file,
     ]
