@@ -13,6 +13,38 @@ def simplify_name(name: str) -> str:
     return "_".join(ALPHANUM.findall(name.replace("'", "")))
 
 
+def convert_to_wav(
+    *, input_file: pathlib.Path, output_file: pathlib.Path, rate: int
+) -> None:
+    cmd: List[str | pathlib.Path] = [
+        "ffmpeg",
+        # Quiet
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        # Overwrite
+        "-y",
+        # Input
+        "-i",
+        input_file,
+        # Downmix to mono
+        "-ac",
+        "1",
+        # Resample
+        "-ar",
+        str(rate),
+        # Output
+        output_file,
+    ]
+    proc = subprocess.run(cmd)
+    if proc.returncode:
+        print(
+            f"Error: ffmpeg failed with status {proc.returncode}",
+            file=sys.stderr,
+        )
+        raise SystemExit(1)
+
+
 def main() -> None:
     p = argparse.ArgumentParser("convert.py", allow_abbrev=False)
     p.add_argument("-input", required=True, help="Input directory", type=pathlib.Path)
@@ -48,28 +80,7 @@ def main() -> None:
         wav_name = name + ".wav"
         for rate, rate_dir in rate_dirs:
             wav_file = rate_dir / wav_name
-            proc = subprocess.run(
-                [
-                    "ffmpeg",
-                    "-hide_banner",
-                    "-loglevel",
-                    "error",
-                    "-y",
-                    "-i",
-                    item,
-                    "-ac",
-                    "1",
-                    "-ar",
-                    str(rate),
-                    wav_file,
-                ]
-            )
-            if proc.returncode:
-                print(
-                    f"Error: ffmpeg failed with status {proc.returncode}",
-                    file=sys.stderr,
-                )
-                raise SystemExit(1)
+            convert_to_wav(input_file=item, output_file=wav_file, rate=rate)
 
 
 if __name__ == "__main__":
