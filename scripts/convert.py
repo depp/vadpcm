@@ -13,7 +13,7 @@ def simplify_name(name: str) -> str:
     return "_".join(ALPHANUM.findall(name.replace("'", "")))
 
 
-def convert_to_wav(
+def convert_to_pcm(
     *, input_file: pathlib.Path, output_file: pathlib.Path, rate: int
 ) -> None:
     cmd: List[str | pathlib.Path] = [
@@ -64,7 +64,6 @@ def main() -> None:
         rate_dir = output_dir / str(rate)
         rate_dir.mkdir(exist_ok=True)
         rate_dirs.append((rate, rate_dir))
-    files: List[pathlib.Path] = []
     names = set()
     for item in input_dir.iterdir():
         if item.name.startswith("."):
@@ -80,11 +79,13 @@ def main() -> None:
         if name in names:
             print("Warning: Skipping duplicate name:", name, file=sys.stderr)
             continue
+        print(f"Converting: {name}", file=sys.stderr)
         names.add(name)
-        wav_name = name + ".wav"
+        pcm_name = name + ".pcm.aiff"
         for rate, rate_dir in rate_dirs:
-            wav_file = rate_dir / wav_name
-            convert_to_wav(input_file=item, output_file=wav_file, rate=rate)
+            print(f"    {rate} Hz", file=sys.stderr)
+            pcm_file = rate_dir / pcm_name
+            convert_to_pcm(input_file=item, output_file=pcm_file, rate=rate)
 
 
 if __name__ == "__main__":
