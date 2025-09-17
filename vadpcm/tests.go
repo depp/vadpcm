@@ -49,7 +49,7 @@ var cmdTestStats = cobra.Command{
 			if st != nil {
 				e := "None"
 				if st.ErrorMeanSquare > 0.0 {
-					e = strconv.FormatFloat(10*math.Log10(st.ErrorMeanSquare/st.SignalMeanSquare), 'f', 2, 64)
+					e = strconv.FormatFloat(10*math.Log10(st.SignalMeanSquare/st.ErrorMeanSquare), 'f', 2, 64)
 				}
 				w.Write([]string{args[i], e})
 			}
