@@ -30,9 +30,6 @@ enum {
 float vadpcm_eval(const float corr[restrict static 6],
                   const float coeff[restrict static 2]);
 
-double vadpcm_eval_solved(const double corr[restrict static 6],
-                          const double coeff[restrict static 2]);
-
 void vadpcm_best_error(size_t frame_count, const float (*restrict corr)[6],
                        float *restrict best_error) {
     for (size_t frame = 0; frame < frame_count; frame++) {
@@ -42,7 +39,8 @@ void vadpcm_best_error(size_t frame_count, const float (*restrict corr)[6],
         }
         double coeff[2];
         vadpcm_solve(fcorr, coeff);
-        best_error[frame] = (float)vadpcm_eval_solved(fcorr, coeff);
+        float fcoeff[2] = { (float)coeff[0], (float)coeff[1] };
+        best_error[frame] = (float)vadpcm_eval(corr[frame], fcoeff);
     }
 }
 
@@ -78,86 +76,139 @@ void vadpcm_meancorrs(size_t frame_count, int predictor_count,
     }
 }
 
+/* Map the 3x3 upper-triangular autocorrelation (flattened as corr[6]) to
+ * Yule–Walker lags r(0), r(1), r(2) for a (nearly) Toeplitz structure.
+ *
+ * Layout in encode.c:
+ *   // [0 1 3]
+ *   // [_ 2 4]
+ *   // [_ _ 5]
+ * and with x0 = s[n], x1 = s[n-1], x2 = s[n-2]:
+ *   corr[0] = Σ x0 x0   ≈ r(0)
+ *   corr[1] = Σ x1 x0   ≈ r(1)
+ *   corr[2] = Σ x1 x1   ≈ r(0)
+ *   corr[3] = Σ x2 x0   ≈ r(2)
+ *   corr[4] = Σ x2 x1   ≈ r(1)
+ *   corr[5] = Σ x2 x2   ≈ r(0)
+ *
+ * We average duplicates to enforce Toeplitz consistency over a finite frame.
+ */
+static inline void vadpcm_corr_to_rxx_yw(const double corr[restrict static 6],
+                                         double rxx[restrict static 3])
+{
+    /* r0: average of the three diagonal terms (variance at lags 0,1,2) */
+    double r0 = (corr[0] + corr[2] + corr[5]) / 3.0;
+    /* r1: average of x0-x1 and x1-x2 cross-terms */
+    double r1 = (corr[1] + corr[4]) / 2.0;
+    /* r2: x0-x2 */
+    double r2 = corr[3];
+
+    rxx[0] = r0;
+    rxx[1] = r1;
+    rxx[2] = r2;
+}
+
+/* Solve AR(2) predictor coefficients via Yule–Walker / Levinson–Durbin.
+ *
+ * Model and notation:
+ *   We predict s[n] from its two past samples:
+ *       s[n] = a1 s[n-1] + a2 s[n-2] + e[n]
+ *
+ *   In AR notation:
+ *       s[n] + φ1 s[n-1] + φ2 s[n-2] = e[n]
+ *   with the relation between parameters:
+ *       a_k = -φ_k   (k = 1,2)
+ *
+ *   Yule–Walker normal equations (Toeplitz):
+ *       [ r(0)  r(1) ] [ φ1 ] = [ r(1) ]
+ *       [ r(1)  r(0) ] [ φ2 ]   [ r(2) ]
+ *
+ *   Levinson–Durbin recursion (p = 2):
+ *     - Order 1:
+ *         k1 = - r(1) / (r(0) + λ)
+ *         φ1^(1) = k1
+ *         E1 = (r(0) + λ) * (1 - k1^2)
+ *     - Order 2:
+ *         k2 = - ( r(2) + φ1^(1) r(1) ) / E1
+ *         φ1 = φ1^(1) * (1 + k2)
+ *         φ2 = k2
+ *   Finally:
+ *       a1 = -φ1,  a2 = -φ2
+ *
+ * Inputs:
+ *   corr[6]  : upper-triangular 3x3 autocorrelation as produced by vadpcm_autocorr
+ * Outputs:
+ *   coeff[2] : { a1, a2 } in the same convention used by encode.c
+ *
+ * Notes:
+ *   - A tiny ridge λ is added to r(0) for numerical robustness on short/flat frames.
+ *   - Reflection coefficients k1, k2 are softly clamped to keep |k| < 1.
+ *   - With exact YW/LD on a valid covariance sequence, stability is guaranteed.
+ */
 void vadpcm_solve(const double corr[restrict static 6],
                   double coeff[restrict static 2]) {
-    // For the autocorrelation matrix A, we want vector v which minimizes the
-    // residual \epsilon,
-    //
-    // \epsilon = [1|v]^T A [1|v]
-    //
-    // We can rewrite this as:
-    //
-    // \epsilon = B + 2 C v + v^T D v
-    //
-    // Where B, C, and D are submatrixes of A. The minimum value, v, satisfies:
-    //
-    // D v + C = 0.
+    double r[3];
+    vadpcm_corr_to_rxx_yw(corr, r);
 
-    double rel_epsilon = 1.0 / 4096.0;
-    coeff[0] = 0.0;
-    coeff[1] = 0.0;
-
-    // The element with maximum absolute value is on the diagonal, by the
-    // Cauchy-Schwarz inequality.
-    double max = corr[0];
-    if (corr[2] > max) {
-        max = corr[2];
-    }
-    if (corr[5] > max) {
-        max = corr[5];
-    }
-    double epsilon = max * rel_epsilon;
-
-    // Solve using Gaussian elimination.
-    //
-    // [a b | x]
-    // [b c | y]
-    double a = corr[2];
-    double b = corr[4];
-    double c = corr[5];
-    double x = corr[1];
-    double y = corr[3];
-
-    // Partial pivoting. Note that a, c are non-negative.
-    int pivot = c > a;
-    if (pivot) {
-        double t;
-        t = a;
-        a = c;
-        c = t;
-        t = x;
-        x = y;
-        y = t;
-    }
-
-    // Multiply first row by 1/a: [1 b/a | x/a]
-    if (a <= epsilon) {
-        // Matrix is close to zero. Just use zero for the predictor
-        // coefficients.
+    /* Degenerate case: no variance */
+    if (!(r[0] > 0.0)) {
+        coeff[0] = 0.0;
+        coeff[1] = 0.0;
         return;
     }
-    double a1 = 1.0 / a;
-    double b1 = b * a1;
-    double x1 = x * a1;
 
-    // Subtract first row * b from second row: [0 c-b1*b | y - x1*b]
-    double c2 = c - b1 * b;
-    double y2 = y - x1 * b;
+    /* Small ridge for conditioning (relative to r0) */
+    const double eps_abs = 1e-12;
+    double lambda = fabs(r[0]) * 1e-6 + eps_abs;
 
-    // Multiply second row by 1/c. [0 1 | y2/c2]
-    if (fabs(c2) <= epsilon) {
-        // Matrix is poorly conditioned or singular. Solve as a first-order
-        // system.
-        coeff[pivot] = x1;
+    double E0 = r[0] + lambda;
+
+    /* Order 1 (compute k1 and φ1^(1)) */
+    double k1 = -r[1] / E0;
+    if (fabs(k1) >= 0.9999) k1 = copysign(0.9999, k1);
+
+    double phi1_1 = k1;
+    double E1 = E0 * (1.0 - k1 * k1);
+
+    /* If we cannot proceed to order 2, degrade to AR(1) */
+    if (!(E1 > (1e-9) * E0)) {
+        coeff[0] = -phi1_1;
+        coeff[1] = 0.0;
         return;
     }
-    double y3 = y2 / c2;
 
-    // Backsubstitute.
-    double x4 = x1 - y3 * b1;
+    /* Order 2 (compute k2 and final φ1, φ2) */
+    double k2 = -(r[2] + phi1_1 * r[1]) / E1;
+    if (fabs(k2) >= 0.9999) k2 = copysign(0.9999, k2);
 
-    coeff[pivot] = x4;
-    coeff[!pivot] = y3;
+    double phi1 = phi1_1 * (1.0 + k2);
+    double phi2 = k2;
+
+    /* Convert AR φ to predictor a */
+    coeff[0] = -phi1;  /* a1 */
+    coeff[1] = -phi2;  /* a2 */
+
+    /* Optional tiny shrink if roots are numerically ~1 */
+    {
+        double a1 = coeff[0], a2 = coeff[1];
+        /* Characteristic: z^2 - a1 z - a2 = 0 */
+        double disc = a1 * a1 + 4.0 * a2;
+        double rmax;
+        if (disc >= 0.0) {
+            double s = sqrt(disc);
+            double r1 = 0.5 * (a1 + s);
+            double r2c = 0.5 * (a1 - s);
+            rmax = fmax(fabs(r1), fabs(r2c));
+        } else {
+            /* Complex conjugate: |root| = sqrt(|a2|) */
+            rmax = sqrt(fabs(a2));
+        }
+        if (rmax >= 0.999999) {
+            double shrink = 0.999999 / rmax;
+            coeff[0] *= shrink;
+            coeff[1] *= shrink;
+        }
+    }
 }
 
 // Refine (improve) the existing predictor assignments. Does not assign
