@@ -27,27 +27,6 @@ inline float vadpcm_eval(const float corr[restrict static 6],
                    corr[3] * coeff[1]);
 }
 
-// Calculate the best-case error from a frame, given its solved coefficients.
-inline double vadpcm_eval_solved(const double corr[restrict static 6],
-                                 const double coeff[restrict static 2]) {
-    // Equivalent to vadpcm_eval(), for the case where coeff are optimal for
-    // this autocorrelation matrix.
-    //
-    // matrix = [k B^T]
-    //          [B A  ]
-    //
-    // solve(A, B) = A^-1 B
-    // eval(k, A, B, x) = k - 2B^T x + x^T A x
-    // eval(k, A, B, solve(A, B))
-    //   = eval(k, A, B, A^-1 B)
-    //   = k - 2B^T (A^-1 B) + (A^-1 B)^T A (A^-1 B)
-    //   = k - 2B^T A^-1 B + B^T A^-1^T A A^-1 B
-    //   = k - 2B^T A^-1 B + B^T A^-1^T B
-    //   = k - B^T A^-1 B
-    //   = k - B^T solve(A, B)
-    return corr[0] - corr[1] * coeff[0] - corr[3] * coeff[1];
-}
-
 // Calculate the best-case error for each frame, given the autocorrelation
 // matrixes.
 void vadpcm_best_error(size_t frame_count, const float (*restrict corr)[6],
