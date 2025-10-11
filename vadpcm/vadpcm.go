@@ -246,7 +246,7 @@ var cmdEncode = cobra.Command{
 		o := aiff.AIFF{
 			Common: aiff.Common{
 				NumChannels:     1,
-				NumFrames:       len(ad.samples) / vadpcm.FrameSampleCount,
+				NumFrames:       len(ad.samples),
 				SampleSize:      16,
 				SampleRate:      ad.rate,
 				Compression:     *(*[4]byte)([]byte(vadpcm.CompressionType)),
