@@ -4,3 +4,7 @@
 
 # CMake
 /build
+
+# Clangd
+/compile_commands.json
+/.cache

@@ -1,3 +1,6 @@
+# https://cliutils.gitlab.io/modern-cmake/README.html
+# "This is as low as most projects should go"
+# Use PROJECT_IS_TOP_LEVEL if version >= 3.21.
 cmake_minimum_required(VERSION 3.15)
 project(VADPCM
   VERSION 1.0
@@ -23,6 +26,8 @@ if(MATH_LIBRARY)
 endif()
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+
+  # Build and run tests.
   include(CTest)
   if(BUILD_TESTING)
     add_executable(codec_test
@@ -38,4 +43,13 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     )
   endif()
+
+  # Export compilation database to correct location.
+  if(UNIX)
+    execute_process(
+      COMMAND ln -sf
+      ${CMAKE_BINARY_DIR}/compile_commands.json
+      ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json)
+  endif()
+
 endif()

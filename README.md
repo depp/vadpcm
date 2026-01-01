@@ -45,8 +45,12 @@ You can build using CMake:
 
     mkdir build
 	cd build
-	cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
-	ninja
-	ninja test
+	cmake ..
+	make
+	make test
 
-You can use the generator of your choice, `-G Ninja` is just a suggestion.
+The Ninja generator, enabled by passing `-G Ninja` to CMake, is recommended.
+
+Pass `-DCMAKE_BUILD_TYPE=Release` to CMake for a release build.
+
+Pass `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON` to CMake to generate the `compile_commands.json` file that Clangd uses. On Unix systems, this will be symlinked into the project source directory.
