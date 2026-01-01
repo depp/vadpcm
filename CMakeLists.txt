@@ -1,0 +1,41 @@
+cmake_minimum_required(VERSION 3.15)
+project(VADPCM
+  VERSION 1.0
+  DESCRIPTION "VADPCM audio codec"
+  LANGUAGES C)
+
+include_directories(.)
+
+add_library(vadpcm STATIC
+  codec/autocorr.c
+  codec/binary.c
+  codec/codebook.c
+  codec/decode.c
+  codec/encode.c
+  codec/error.c
+  codec/predictor.c
+  codec/random.c
+)
+
+find_library(MATH_LIBRARY m)
+if(MATH_LIBRARY)
+  target_link_libraries(vadpcm PUBLIC ${MATH_LIBRARY})
+endif()
+
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+  include(CTest)
+  if(BUILD_TESTING)
+    add_executable(codec_test
+      codec/decode_test.c
+      codec/encode_test.c
+      codec/predictor_test.c
+      codec/test.c
+    )
+    target_link_libraries(codec_test vadpcm ${MATH_LIBRARY})
+    add_test(
+      NAME codec_test
+      COMMAND $<TARGET_FILE:codec_test>
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    )
+  endif()
+endif()

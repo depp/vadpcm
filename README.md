@@ -23,6 +23,30 @@ VADPCM uses a codebook of second-order linear predictors, and encodes the residu
 
 ## Development
 
+This project supports two build systems: Bazel and CMake. You can pick your preferred build system, although CMake support is currently incomplete.
+
+### Bazel
+
+The primary encoder tool is `//vadpcm`. It is writtin in Go.
+
+    bazel build -c opt //vadpcm
+
+The encoder / decoder library, written in C, is `//codec`.
+
+    bazel build -c opt //codec
+
 Generate the `compile_commands.json` file:
 
     bazel run @hedron_compile_commands//:refresh_all
+
+### CMake
+
+You can build using CMake:
+
+    mkdir build
+	cd build
+	cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
+	ninja
+	ninja test
+
+You can use the generator of your choice, `-G Ninja` is just a suggestion.

@@ -1,2 +1,6 @@
+# Bazel
 /bazel-*
 /.user.bazelrc
+
+# CMake
+/build
