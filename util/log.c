@@ -90,3 +90,28 @@ void log_debug(const char *file, int line, const char *fmt, ...) {
     log_msg(LEVEL_DEBUG, file, line, false, 0, fmt, ap);
     va_end(ap);
 }
+
+static char hexdigit(int x) {
+    return x < 10 ? x + '0' : x - 10 + 'a';
+}
+
+void format_fourcc(char *buf, uint32_t fourcc) {
+    *buf++ = '\'';
+    for (int i = 0; i < 4; i++) {
+        int c = (fourcc >> (i * 8)) & 0xff;
+        if (32 <= c && c <= 126) {
+            if (c == '\'' || c == '\'') {
+                *buf++ = '\\';
+            }
+            *buf++ = c;
+        } else {
+            buf[0] = '\\';
+            buf[1] = 'x';
+            buf[2] = hexdigit(c >> 4);
+            buf[3] = hexdigit(c & 15);
+            buf += 4;
+        }
+    }
+    *buf++ = '\'';
+    *buf++ = '\0';
+}

@@ -79,3 +79,15 @@ inline uint32_t id32(uint32_t x) {
 #else
 #error "Unknown byte order"
 #endif
+
+// ============================================================================
+// FOURCC
+// ============================================================================
+
+enum {
+    // Buffer size for formatting a four character code.
+    FOURCC_BUFSZ = 4 * 4 + 3,
+};
+
+// Format a four-character code for printing.
+void format_fourcc(char *buf, uint32_t fourcc);
