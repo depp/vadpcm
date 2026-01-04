@@ -242,7 +242,7 @@ vadpcm_error vadpcm_assign_predictors(size_t frame_count, int predictor_count,
     if (best_error == NULL) {
         return kVADPCMErrMemory;
     }
-    float *error = malloc(frame_count * sizeof(*best_error));
+    float *error = malloc(frame_count * sizeof(*error));
     if (error == NULL) {
         free(best_error);
         return kVADPCMErrMemory;
