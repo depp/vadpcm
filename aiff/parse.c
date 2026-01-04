@@ -187,6 +187,10 @@ int aiff_parse(struct aiff_data *aiff, const void *ptr, size_t size) {
         LOG_ERROR("no COMM chunk");
         return -1;
     }
+    if (!has_ssnd) {
+        LOG_ERROR("no SSND chunk");
+        return -1;
+    }
     LOG_DEBUG("channels: %" PRIu32, aiff->num_channels);
     LOG_DEBUG("frames: %" PRIu32, aiff->num_sample_frames);
     LOG_DEBUG("bits: %" PRIu32, aiff->sample_size);
