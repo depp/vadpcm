@@ -7,6 +7,7 @@
 #include "util/util.h"
 
 #include <errno.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -41,6 +42,8 @@ int aiff_read(struct aiff_data *data, const char *filename) {
         LOG_ERROR("read %s: not an AIFF or AIFF-C file", filename);
         return -1;
     }
+    uint32_t size = SWAP32_BE(header.chunk_size);
+    LOG_DEBUG("size = %" PRIu32, size);
     (void)is_aiffc;
     (void)data;
     fclose(file);

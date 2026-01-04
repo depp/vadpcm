@@ -3,6 +3,8 @@
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #pragma once
 
+#include <stdint.h>
+
 // ============================================================================
 // Logging
 // ============================================================================
@@ -40,12 +42,40 @@ void log_debug(const char *file, int line, const char *fmt, ...)
      (uint32_t)(c4))
 #define FOURCC_SWAPPED(c1, c2, c3, c4) FOURCC_NATIVE(c4, c3, c2, c1)
 
+// Swap the byte order on a 16-bit value.
+inline uint16_t swap16(uint16_t x) {
+    return __builtin_bswap16(x);
+}
+
+// Swap the byte order on a 32-bit value.
+inline uint32_t swap32(uint32_t x) {
+    return __builtin_bswap32(x);
+}
+
+// Return a 16-bit value.
+inline uint16_t id16(uint16_t x) {
+    return x;
+}
+
+// Return a 32-bit value.
+inline uint32_t id32(uint32_t x) {
+    return x;
+}
+
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define FOURCC_LE FOURCC_NATIVE
 #define FOURCC_BE FOURCC_SWAPPED
+#define SWAP16_LE id16
+#define SWAP32_LE id32
+#define SWAP16_BE swap16
+#define SWAP32_BE swap32
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #define FOURCC_LE FOURCC_SWAPPED
 #define FOURCC_BE FOURCC_NATIVE
+#define SWAP16_LE swap16
+#define SWAP32_LE swap32
+#define SWAP16_BE id16
+#define SWAP32_BE id32
 #else
 #error "Unknown byte order"
 #endif

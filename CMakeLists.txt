@@ -69,5 +69,6 @@ endif()
 add_executable(vadpcmenc
   aiff/read.c
   util/log.c
+  util/swap.c
   vadpcm/vadpcmenc.c
 )
