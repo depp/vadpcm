@@ -33,6 +33,15 @@ void log_debug(const char *file, int line, const char *fmt, ...)
 #define LOG_DEBUG(...) log_debug(__FILE__, __LINE__, __VA_ARGS__)
 
 // ============================================================================
+// Memory Allocation
+// ============================================================================
+
+void *xmalloc(const char *file, int line, size_t nmemb, size_t size)
+    __attribute__((malloc, alloc_size(3, 4)));
+
+#define XMALLOC(nmemb, size) xmalloc(__FILE__, __LINE__, nmemb, size)
+
+// ============================================================================
 // Byte Order
 // ============================================================================
 
@@ -94,7 +103,7 @@ enum {
 void format_fourcc(char *buf, uint32_t fourcc);
 
 // ============================================================================
-// Flie Input
+// File Input
 // ============================================================================
 
 struct input_file {

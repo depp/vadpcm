@@ -11,6 +11,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+// Benign comparison between off_t and size_t below.
+#pragma GCC diagnostic ignored "-Wsign-compare"
+
 int input_file_read(struct input_file *file, const char *filename) {
     int fd = open(filename, O_RDONLY);
     if (fd == -1) {

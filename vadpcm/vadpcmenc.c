@@ -6,9 +6,15 @@
 #include "util/util.h"
 
 #include <getopt.h>
+#include <inttypes.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+// Maximum number of samples in an input file. This prevents the number of
+// frames from overflowing a uint32_t after padding.
+#define MAX_INPUT_LENGTH (~((uint32_t)(kVADPCMFrameSampleCount - 1)))
 
 enum {
     kDefaultPredictorCount = 4,
@@ -23,6 +29,13 @@ static const char HELP[] =
     "  -h, --help          Show this help\n"
     "  -p, --predictors n  Set the number of predictors to use (1..16, default "
     "4)\n";
+
+// Copy 16-bit big-endian samples into the destination.
+static void copy_samples(int16_t *dest, const uint8_t *src, size_t n) {
+    for (size_t i = 0; i < n; i++) {
+        dest[i] = ((uint16_t)src[2 * i] << 8) | (uint16_t)src[2 * i + 1];
+    }
+}
 
 int main(int argc, char **argv) {
     static const struct option long_options[] = {
@@ -78,10 +91,42 @@ int main(int argc, char **argv) {
     if (r != 0) {
         return 1;
     }
+    LOG_DEBUG("read input file");
     if (aiff.codec == kAIFFCodecVADPCM) {
         LOG_ERROR("input file is already encoded using VADPCM");
         return 1;
     }
+    if (aiff.num_channels != 1) {
+        LOG_ERROR("only mono files are supported; channels=%" PRIu32,
+                  aiff.num_channels);
+        return 1;
+    }
+    if (aiff.sample_size != 16) {
+        LOG_ERROR("only 16-bit samples are supported; bits=%" PRIu32,
+                  aiff.sample_size);
+        return 1;
+    }
+    if (aiff.num_sample_frames > MAX_INPUT_LENGTH) {
+        LOG_ERROR("input file is too long; length=%" PRIu32
+                  ", maximum=%" PRIu32,
+                  aiff.num_sample_frames, MAX_INPUT_LENGTH);
+    }
+
+    // PCM and VADPCM frame counts.
+    uint32_t pcm_frame_count = aiff.num_sample_frames;
+    uint32_t vadpcm_frame_count =
+        pcm_frame_count / kVADPCMFrameSampleCount +
+        ((pcm_frame_count & (kVADPCMFrameSampleCount - 1)) != 0);
+    // PCM data is padded to a multiple of the VADPCM frame size. No overflow
+    // due to MAX_INPUT_LENGTH check.
+    uint32_t padded_frame_count = pcm_frame_count * kVADPCMFrameSampleCount;
+    int16_t *samples = XMALLOC(padded_frame_count, sizeof(*samples));
+    copy_samples(samples, aiff.audio_ptr, pcm_frame_count);
+    memset(samples + pcm_frame_count, 0,
+           sizeof(int16_t) * (padded_frame_count - pcm_frame_count));
+
+    (void)vadpcm_frame_count;
+
     LOG_INFO("ok");
     return 0;
 }
