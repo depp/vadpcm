@@ -32,15 +32,17 @@ struct aiff_comminfo {
     int format;
 };
 
-// Read a 16-bit aligned 32-bit word.
-static uint32_t read32w(const uint16_t x[2]) {
-    return ((uint32_t)SWAP16_BE(x[0]) << 16) | (uint32_t)SWAP16_BE(x[1]);
+// Read an unaligned 32-bit value.
+static uint32_t read32(const void *ptr) {
+    uint32_t x;
+    memcpy(&x, ptr, sizeof(uint32_t));
+    return x;
 }
 
 static void aiff_parse_comm(struct aiff_comminfo *info,
                             const struct aiff_comm *comm) {
     info->num_channels = SWAP16_BE(comm->num_channels);
-    info->num_sample_frames = read32w(comm->num_sample_frames);
+    info->num_sample_frames = SWAP32_BE(read32(comm->num_sample_frames));
     info->sample_size = SWAP16_BE(comm->sample_size);
     info->sample_rate = comm->sample_rate;
 }
@@ -67,7 +69,15 @@ static int aiff_read_comm2(struct aiff_comminfo *info, const void *ptr,
         return -1;
     }
     aiff_parse_comm(info, ptr);
-    info->format = FORMAT_PCM;
+    uint32_t id = read32((const char *)ptr + 18);
+    if (id == CODEC_PCM) {
+        info->format = FORMAT_PCM;
+    } else {
+        char buf[FOURCC_BUFSZ];
+        format_fourcc(buf, id);
+        LOG_ERROR("unknown codec; id=%s", buf);
+        return -1;
+    }
     return 0;
 }
 

@@ -16,6 +16,9 @@
 #define CHUNK_INST FOURCC_BE('I', 'N', 'S', 'T')
 #define CHUNK_APPL FOURCC_BE('A', 'P', 'P', 'L')
 
+#define CODEC_PCM FOURCC_BE('N', 'O', 'N', 'E')
+#define CODEC_VADPCM FOURCC_BE('V', 'A', 'P', 'C')
+
 struct extended {
     uint16_t sign_exponent;
     uint16_t fraction[4];
