@@ -1,6 +1,9 @@
 // Copyright 2026 Dietrich Epp.
 // This file is part of VADPCM. VADPCM is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
+#pragma once
+
+#include "aiff/aiff.h"
 #include "util/util.h"
 
 #include <stdint.h>
@@ -18,11 +21,6 @@
 
 #define CODEC_PCM FOURCC_BE('N', 'O', 'N', 'E')
 #define CODEC_VADPCM FOURCC_BE('V', 'A', 'P', 'C')
-
-struct extended {
-    uint16_t sign_exponent;
-    uint16_t fraction[4];
-};
 
 struct aiff_header {
     uint32_t chunk_id;

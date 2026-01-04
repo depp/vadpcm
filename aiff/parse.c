@@ -19,19 +19,6 @@
 #pragma GCC diagnostic ignored "-Wtype-limits"
 #endif
 
-enum {
-    FORMAT_PCM,
-    FORMAT_VADPCM,
-};
-
-struct aiff_comminfo {
-    uint32_t num_channels;
-    uint32_t num_sample_frames;
-    uint32_t sample_size;
-    struct extended sample_rate;
-    int format;
-};
-
 // Read an unaligned 32-bit value.
 static uint32_t read32(const void *ptr) {
     uint32_t x;
@@ -39,44 +26,47 @@ static uint32_t read32(const void *ptr) {
     return x;
 }
 
-static void aiff_parse_comm(struct aiff_comminfo *info,
+static void aiff_parse_comm(struct aiff_data *aiff,
                             const struct aiff_comm *comm) {
-    info->num_channels = SWAP16_BE(comm->num_channels);
-    info->num_sample_frames = SWAP32_BE(read32(comm->num_sample_frames));
-    info->sample_size = SWAP16_BE(comm->sample_size);
-    info->sample_rate = comm->sample_rate;
+    aiff->num_channels = SWAP16_BE(comm->num_channels);
+    aiff->num_sample_frames = SWAP32_BE(read32(comm->num_sample_frames));
+    aiff->sample_size = SWAP16_BE(comm->sample_size);
+    aiff->sample_rate = comm->sample_rate;
 }
 
-static int aiff_read_comm(struct aiff_comminfo *info, const void *ptr,
+static int aiff_read_comm(struct aiff_data *aiff, const void *ptr,
                           uint32_t size) {
     if (size != 18) {
-        LOG_ERROR("invalid common chunk: len = %" PRIu32
-                  ", should be 18 or more",
-                  size);
+        LOG_ERROR("COMM chunk too small; size=%" PRIu32 ", minimum=18", size);
         return -1;
     }
-    aiff_parse_comm(info, ptr);
-    info->format = FORMAT_PCM;
+    aiff_parse_comm(aiff, ptr);
+    aiff->codec = kAIFFCodecPCM;
     return 0;
 }
 
-static int aiff_read_comm2(struct aiff_comminfo *info, const void *ptr,
+static int aiff_read_comm2(struct aiff_data *aiff, const void *ptr,
                            uint32_t size) {
     if (size < 23) {
-        LOG_ERROR("invalid common chunk: len = %" PRIu32
-                  ", should be 23 or more",
+        LOG_ERROR("COMM chunk is too small; size=%" PRIu32 ", minimum=23",
                   size);
         return -1;
     }
-    aiff_parse_comm(info, ptr);
+    aiff_parse_comm(aiff, ptr);
     uint32_t id = read32((const char *)ptr + 18);
-    if (id == CODEC_PCM) {
-        info->format = FORMAT_PCM;
-    } else {
+    switch (id) {
+    case CODEC_PCM:
+        aiff->codec = kAIFFCodecPCM;
+        break;
+    case CODEC_VADPCM:
+        aiff->codec = kAIFFCodecVADPCM;
+        break;
+    default: {
         char buf[FOURCC_BUFSZ];
         format_fourcc(buf, id);
         LOG_ERROR("unknown codec; id=%s", buf);
         return -1;
+    } break;
     }
     return 0;
 }
@@ -120,7 +110,7 @@ int aiff_parse(struct aiff_data *aiff, const void *ptr, size_t size) {
     ptrdiff_t offset = 12;
     ptrdiff_t end = content_size + 8;
     bool has_comm = false;
-    struct aiff_comminfo comm;
+    bool has_ssnd = false;
     while (offset < end) {
         if ((ptrdiff_t)sizeof(struct aiff_chunk) > end - offset) {
             LOG_ERROR("incomplete chunk header; offset=%td", offset);
@@ -147,17 +137,37 @@ int aiff_parse(struct aiff_data *aiff, const void *ptr, size_t size) {
             has_comm = true;
             int r;
             if (is_aiffc) {
-                r = aiff_read_comm2(&comm, chunk_ptr, chunk_size);
+                r = aiff_read_comm2(aiff, chunk_ptr, chunk_size);
             } else {
-                r = aiff_read_comm(&comm, chunk_ptr, chunk_size);
+                r = aiff_read_comm(aiff, chunk_ptr, chunk_size);
             }
             if (r != 0) {
                 return r;
             }
             break;
+        case CHUNK_SSND:
+            if (has_ssnd) {
+                LOG_ERROR("multiple SSND chunks found");
+                return -1;
+            }
+            if (chunk_size < 8) {
+                LOG_ERROR("SSND chunk is too small; size=%" PRIu32
+                          ", minimum=8",
+                          chunk_size);
+                return -1;
+            }
+            has_ssnd = true;
+            {
+                uint32_t offset = SWAP32_BE(read32(chunk_ptr));
+                if (offset > chunk_size - 8) {
+                    LOG_ERROR("invalid SSND offfset; offset=%" PRIu32, offset);
+                    return -1;
+                }
+                aiff->audio_ptr = (const char *)chunk_ptr + offset + 8;
+                aiff->audio_size = chunk_size - 8 - offset;
+            }
+            break;
         /* case CHUNK_FVER: */
-        /*     break; */
-        /* case CHUNK_SSND: */
         /*     break; */
         /* case CHUNK_MARK: */
         /*     break; */
@@ -177,9 +187,10 @@ int aiff_parse(struct aiff_data *aiff, const void *ptr, size_t size) {
         LOG_ERROR("no COMM chunk");
         return -1;
     }
-    LOG_DEBUG("channels: %" PRIu32, comm.num_channels);
-    LOG_DEBUG("frames: %" PRIu32, comm.num_sample_frames);
-    LOG_DEBUG("bits: %" PRIu32, comm.sample_size);
+    LOG_DEBUG("channels: %" PRIu32, aiff->num_channels);
+    LOG_DEBUG("frames: %" PRIu32, aiff->num_sample_frames);
+    LOG_DEBUG("bits: %" PRIu32, aiff->sample_size);
+    LOG_DEBUG("audio: ptr=%p; size=%zu", aiff->audio_ptr, aiff->audio_size);
     (void)aiff;
     return 0;
 }
