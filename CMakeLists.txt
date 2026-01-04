@@ -7,6 +7,18 @@ project(VADPCM
   DESCRIPTION "VADPCM audio codec"
   LANGUAGES C)
 
+option(ENABLE_WARNINGS "enable C warning flags")
+option(ENABLE_WERROR "treat warnings as errors")
+
+if(ENABLE_WARNINGS)
+  add_compile_options(
+    -Wall -Wextra -Wpointer-arith -Wwrite-strings -Wmissing-prototypes
+    -Wdouble-promotion -Winit-self -Wstrict-prototypes -Wno-format-zero-length)
+endif()
+if(ENABLE_WERROR)
+  add_compile_options(-Werror)
+endif()
+
 include_directories(.)
 
 add_library(vadpcm STATIC
