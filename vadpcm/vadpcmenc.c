@@ -110,6 +110,7 @@ int main(int argc, char **argv) {
         LOG_ERROR("input file is too long; length=%" PRIu32
                   ", maximum=%" PRIu32,
                   aiff.num_sample_frames, MAX_INPUT_LENGTH);
+        return 1;
     }
 
     // PCM and VADPCM frame counts.
@@ -120,12 +121,23 @@ int main(int argc, char **argv) {
     // PCM data is padded to a multiple of the VADPCM frame size. No overflow
     // due to MAX_INPUT_LENGTH check.
     uint32_t padded_frame_count = pcm_frame_count * kVADPCMFrameSampleCount;
-    int16_t *samples = XMALLOC(padded_frame_count, sizeof(*samples));
-    copy_samples(samples, aiff.audio_ptr, pcm_frame_count);
-    memset(samples + pcm_frame_count, 0,
+    int16_t *pcm_data = XMALLOC(padded_frame_count, sizeof(*pcm_data));
+    copy_samples(pcm_data, aiff.audio_ptr, pcm_frame_count);
+    memset(pcm_data + pcm_frame_count, 0,
            sizeof(int16_t) * (padded_frame_count - pcm_frame_count));
 
-    (void)vadpcm_frame_count;
+    void *vadpcm_data = XMALLOC(vadpcm_frame_count, kVADPCMFrameByteSize);
+    struct vadpcm_params params = {
+        .predictor_count = predictor_count,
+    };
+    struct vadpcm_vector codebook[kVADPCMMaxPredictorCount];
+    struct vadpcm_stats stats;
+    vadpcm_error err = vadpcm_encode(&params, codebook, vadpcm_frame_count,
+                                     vadpcm_data, pcm_data, &stats);
+    if (err != 0) {
+        LOG_ERROR("encoding failed: %s", vadpcm_error_name(err));
+        return 1;
+    }
 
     LOG_INFO("ok");
     return 0;

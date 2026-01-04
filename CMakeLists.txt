@@ -74,3 +74,4 @@ add_executable(vadpcmenc
   util/swap.c
   vadpcm/vadpcmenc.c
 )
+target_link_libraries(vadpcmenc vadpcm)
