@@ -13,9 +13,41 @@
 #include <stdio.h>
 #include <string.h>
 
-static void log_msg(const char *file, int line, bool has_errcode, int errcode,
-                    const char *fmt, va_list ap) {
-    fprintf(stderr, "\33[1;31mError\33[0m: %s:%d: ", file, line);
+enum {
+    LEVEL_ERROR,
+    LEVEL_INFO,
+    LEVEL_DEBUG,
+};
+
+struct log_level {
+    char color[5];
+    char name[6];
+};
+
+static const struct log_level LEVELS[] = {
+    [LEVEL_ERROR] = {.color = "1;31", .name = "Error"},
+    [LEVEL_INFO] = {.color = "32", .name = "Info"},
+    [LEVEL_DEBUG] = {.color = "35", .name = "Debug"},
+};
+
+static const char *strip_file_prefix(const char *file) {
+    const char *ref = __FILE__;
+    size_t ref_len = strlen(ref);
+    size_t file_len = strlen(file);
+    enum { UTIL_LOG_LEN = 10 };
+    if (ref_len > UTIL_LOG_LEN) {
+        ref_len -= UTIL_LOG_LEN;
+        if (file_len > ref_len && memcmp(ref, file, ref_len) == 0) {
+            file += ref_len;
+        }
+    }
+    return file;
+}
+
+static void log_msg(int level, const char *file, int line, bool has_errcode,
+                    int errcode, const char *fmt, va_list ap) {
+    fprintf(stderr, "\33[%sm%s\33[0m: %s:%d: ", LEVELS[level].color,
+            LEVELS[level].name, strip_file_prefix(file), line);
     vfprintf(stderr, fmt, ap);
     if (has_errcode) {
         fputs(": ", stderr);
@@ -33,7 +65,7 @@ static void log_msg(const char *file, int line, bool has_errcode, int errcode,
 void log_error(const char *file, int line, const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    log_msg(file, line, false, 0, fmt, ap);
+    log_msg(LEVEL_ERROR, file, line, false, 0, fmt, ap);
     va_end(ap);
 }
 
@@ -41,6 +73,20 @@ void log_error_errno(const char *file, int line, int errcode, const char *fmt,
                      ...) {
     va_list ap;
     va_start(ap, fmt);
-    log_msg(file, line, true, errcode, fmt, ap);
+    log_msg(LEVEL_ERROR, file, line, true, errcode, fmt, ap);
+    va_end(ap);
+}
+
+void log_info(const char *file, int line, const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    log_msg(LEVEL_INFO, file, line, false, 0, fmt, ap);
+    va_end(ap);
+}
+
+void log_debug(const char *file, int line, const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    log_msg(LEVEL_DEBUG, file, line, false, 0, fmt, ap);
     va_end(ap);
 }

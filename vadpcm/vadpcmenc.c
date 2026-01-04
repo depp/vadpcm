@@ -65,17 +65,15 @@ int main(int argc, char **argv) {
     }
     const char *input_file = argv[optind];
     const char *output_file = argv[optind + 1];
-    fprintf(stderr,
-            "input: %s\n"
-            "output: %s\n"
-            "predictor count: %d\n",
-            input_file, output_file, predictor_count);
+    LOG_DEBUG("input: %s", input_file);
+    LOG_DEBUG("output: %s", output_file);
+    LOG_DEBUG("predictor count: %d", predictor_count);
     struct aiff_data data;
     int r = aiff_read(&data, input_file);
     if (r != 0) {
         LOG_ERROR("aiff_read failed");
         return 1;
     }
-    fputs("OK\n", stderr);
+    LOG_INFO("ok");
     return 0;
 }
