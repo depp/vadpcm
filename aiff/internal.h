@@ -16,6 +16,11 @@
 #define CHUNK_INST FOURCC_BE('I', 'N', 'S', 'T')
 #define CHUNK_APPL FOURCC_BE('A', 'P', 'P', 'L')
 
+struct extended {
+    uint16_t sign_exponent;
+    uint16_t fraction[4];
+};
+
 struct aiff_header {
     uint32_t chunk_id;
     uint32_t chunk_size;
@@ -25,4 +30,23 @@ struct aiff_header {
 struct aiff_chunk {
     uint32_t chunk_id;
     uint32_t chunk_size;
+};
+
+// COMM chunk for AIFF.
+struct aiff_comm {
+    // Number of channels.
+    uint16_t num_channels;
+    // Number of frames. Each channel has one sample per frame.
+    uint16_t num_sample_frames[2]; // Unaligned uint32.
+    // Size of each sample, in bits.
+    uint16_t sample_size;
+    // Sample rate, in Hz.
+    struct extended sample_rate;
+};
+
+// COMM chunk for AIFF-C.
+struct aiff_comm2 {
+    struct aiff_comm comm;
+    uint16_t compression_type[2];  // Unaligned uint32.
+    uint8_t compression_name[256]; // Pascal style string.
 };
