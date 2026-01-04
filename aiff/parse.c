@@ -34,8 +34,8 @@ static void aiff_parse_comm(struct aiff_data *aiff,
     aiff->sample_rate = comm->sample_rate;
 }
 
-static int aiff_read_comm(struct aiff_data *aiff, const void *ptr,
-                          uint32_t size) {
+static int aiff_parse_comm1(struct aiff_data *aiff, const void *ptr,
+                            uint32_t size) {
     if (size != 18) {
         LOG_ERROR("COMM chunk too small; size=%" PRIu32 ", minimum=18", size);
         return -1;
@@ -45,8 +45,8 @@ static int aiff_read_comm(struct aiff_data *aiff, const void *ptr,
     return 0;
 }
 
-static int aiff_read_comm2(struct aiff_data *aiff, const void *ptr,
-                           uint32_t size) {
+static int aiff_parse_comm2(struct aiff_data *aiff, const void *ptr,
+                            uint32_t size) {
     if (size < 23) {
         LOG_ERROR("COMM chunk is too small; size=%" PRIu32 ", minimum=23",
                   size);
@@ -137,9 +137,9 @@ int aiff_parse(struct aiff_data *aiff, const void *ptr, size_t size) {
             has_comm = true;
             int r;
             if (is_aiffc) {
-                r = aiff_read_comm2(aiff, chunk_ptr, chunk_size);
+                r = aiff_parse_comm2(aiff, chunk_ptr, chunk_size);
             } else {
-                r = aiff_read_comm(aiff, chunk_ptr, chunk_size);
+                r = aiff_parse_comm1(aiff, chunk_ptr, chunk_size);
             }
             if (r != 0) {
                 return r;
