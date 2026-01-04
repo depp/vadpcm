@@ -78,6 +78,10 @@ int main(int argc, char **argv) {
     if (r != 0) {
         return 1;
     }
+    if (aiff.codec == kAIFFCodecVADPCM) {
+        LOG_ERROR("input file is already encoded using VADPCM");
+        return 1;
+    }
     LOG_INFO("ok");
     return 0;
 }
