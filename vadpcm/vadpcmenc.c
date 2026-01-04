@@ -7,6 +7,7 @@
 
 #include <getopt.h>
 #include <inttypes.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -138,6 +139,11 @@ int main(int argc, char **argv) {
         LOG_ERROR("encoding failed: %s", vadpcm_error_name(err));
         return 1;
     }
+    double signal_level = 10.0 * log10(stats.signal_mean_square);
+    double error_level = 10.0 * log10(stats.error_mean_square);
+    LOG_INFO("signal level: %.2f dB", signal_level);
+    LOG_INFO("error level: %.2f dB", error_level);
+    LOG_INFO("SNR: %.2f dB", signal_level - error_level);
 
     LOG_INFO("ok");
     return 0;
