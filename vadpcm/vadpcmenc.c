@@ -68,10 +68,14 @@ int main(int argc, char **argv) {
     LOG_DEBUG("input: %s", input_file);
     LOG_DEBUG("output: %s", output_file);
     LOG_DEBUG("predictor count: %d", predictor_count);
-    struct aiff_data data;
-    int r = aiff_read(&data, input_file);
+    struct input_file input;
+    int r = input_file_read(&input, input_file);
     if (r != 0) {
-        LOG_ERROR("aiff_read failed");
+        return 1;
+    }
+    struct aiff_data aiff;
+    r = aiff_parse(&aiff, input.data, input.size);
+    if (r != 0) {
         return 1;
     }
     LOG_INFO("ok");

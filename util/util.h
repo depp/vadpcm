@@ -3,6 +3,7 @@
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
 
 // ============================================================================
@@ -91,3 +92,14 @@ enum {
 
 // Format a four-character code for printing.
 void format_fourcc(char *buf, uint32_t fourcc);
+
+// ============================================================================
+// Flie Input
+// ============================================================================
+
+struct input_file {
+    void *data;
+    size_t size;
+};
+
+int input_file_read(struct input_file *file, const char *filename);

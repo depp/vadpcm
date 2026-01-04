@@ -67,7 +67,8 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 endif()
 
 add_executable(vadpcmenc
-  aiff/read.c
+  aiff/parse.c
+  util/file.c
   util/log.c
   util/swap.c
   vadpcm/vadpcmenc.c

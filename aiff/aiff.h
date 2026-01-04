@@ -4,9 +4,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+// A parsed AIFF or AIFF-C file.
 struct aiff_data {
     int16_t *samples;
 };
 
-// Read an AIFF or AIFF-C file. Returns 0 on success.
-int aiff_read(struct aiff_data *data, const char *filename);
+// Parse an AIFF or AIFF-C file. Returns 0 on success.
+int aiff_parse(struct aiff_data *aiff, const void *ptr, size_t size);
