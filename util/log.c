@@ -46,6 +46,7 @@ static const char *strip_file_prefix(const char *file) {
 
 static void log_msg(int level, const char *file, int line, bool has_errcode,
                     int errcode, const char *fmt, va_list ap) {
+    flockfile(stderr);
     fprintf(stderr, "\33[%sm%s\33[0m: %s:%d: ", LEVELS[level].color,
             LEVELS[level].name, strip_file_prefix(file), line);
     vfprintf(stderr, fmt, ap);
@@ -60,6 +61,7 @@ static void log_msg(int level, const char *file, int line, bool has_errcode,
         }
     }
     fputc('\n', stderr);
+    funlockfile(stderr);
 }
 
 void log_error(const char *file, int line, const char *fmt, ...) {

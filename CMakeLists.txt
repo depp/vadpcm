@@ -25,6 +25,9 @@ if(SANITIZERS)
   add_link_options("-fsanitize=${SANITIZERS}")
 endif()
 
+add_compile_options(-pthread)
+add_link_options(-pthread)
+
 include_directories(.)
 
 add_library(vadpcm STATIC
