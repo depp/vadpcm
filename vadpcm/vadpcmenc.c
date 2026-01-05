@@ -96,5 +96,7 @@ int main(int argc, char **argv) {
     LOG_INFO("SNR: %.2f dB", signal_level - error_level);
 
     LOG_INFO("ok");
+    free(audio.sample_data);
+    free(vadpcm_data);
     return 0;
 }
