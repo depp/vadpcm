@@ -11,6 +11,11 @@ def main():
     infile = args.infile
 
     df = load.load(infile)
+    df = (
+        df.group_by("rate")
+        .agg(pl.col("rel_error").pow(2).mean().log10().mul(10))
+        .sort("rate")
+    )
     print(df)
 
 
