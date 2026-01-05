@@ -9,6 +9,7 @@ project(VADPCM
 
 option(ENABLE_WARNINGS "enable C warning flags")
 option(ENABLE_WERROR "treat warnings as errors")
+set(SANITIZERS OFF CACHE STRING "enable sanitizers")
 
 if(ENABLE_WARNINGS)
   add_compile_options(
@@ -17,6 +18,11 @@ if(ENABLE_WARNINGS)
 endif()
 if(ENABLE_WERROR)
   add_compile_options(-Werror)
+endif()
+
+if(SANITIZERS)
+  add_compile_options("-fsanitize=${SANITIZERS}")
+  add_link_options("-fsanitize=${SANITIZERS}")
 endif()
 
 include_directories(.)
