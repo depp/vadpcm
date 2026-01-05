@@ -161,6 +161,7 @@ void vadpcm_solve(const double corr[restrict static 6],
 }
 
 int vadpcm_stabilize(double coeff[restrict static 2]) {
+    // TODO: The new coefficient calculations have not been checked closely.
     if (coeff[1] < -1.0) {
         coeff[1] = -1.0;
         if (coeff[0] < -1.0) {
@@ -172,14 +173,26 @@ int vadpcm_stabilize(double coeff[restrict static 2]) {
     }
     if (coeff[0] > 0.0) {
         if (coeff[1] + coeff[0] > 1.0) {
-            coeff[0] = 0.0;
-            coeff[1] = 0.0;
+            double d = coeff[1] - coeff[0];
+            if (d < -3.0) {
+                d = -3.0;
+            } else if (d > 1.0) {
+                d = 1.0;
+            }
+            coeff[0] = 0.5 - 0.5 * d;
+            coeff[1] = 0.5 + 0.5 * d;
             return 1;
         }
     } else {
         if (coeff[1] - coeff[0] > 1.0) {
-            coeff[0] = 0.0;
-            coeff[1] = 0.0;
+            double d = coeff[1] + coeff[0];
+            if (d < -3.0) {
+                d = -3.0;
+            } else if (d > 1.0) {
+                d = 1.0;
+            }
+            coeff[0] = 0.5 * d - 0.5;
+            coeff[1] = 0.5 * d + 0.5;
             return 1;
         }
     }

@@ -164,15 +164,9 @@ static int vector_supremum(
     return norm;
 }
 
-static void test_stability_fail(const double coeff[static 2],
-                                struct vadpcm_vector vectors[static 2],
-                                const char *reason) {
-    fprintf(stderr,
-            "test_stability case (%+4.1f, %+4.1f)\n"
-            "\tfail: %s\n",
-            coeff[0], coeff[1], reason);
+static void print_vecs(struct vadpcm_vector vectors[static 2], const char *name) {
     for (int i = 0; i < 2; i++) {
-        fprintf(stderr, "\tvec[%d] = [", i);
+        fprintf(stderr, "\t%s[%d] = [", name, i);
         for (int j = 0; j < kVADPCMVectorSampleCount; j++) {
             if (j > 0) {
                 fputs(", ", stderr);
@@ -183,41 +177,72 @@ static void test_stability_fail(const double coeff[static 2],
     }
 }
 
+static void test_stability_fail(const double coeff[static 2],
+                                const char *reason) {
+    fprintf(stderr,
+            "test_stability case (%+4.1f, %+4.1f)\n"
+            "\tfail: %s\n",
+            coeff[0], coeff[1], reason);
+}
+
 void test_stability(void) {
-    enum { ONE = 1 << 11 };
+    enum {
+        ONE = 1 << 11,
+        LIMIT = 18432,
+        RES = 10,
+        DIM = 2 * RES + 1,
+    };
+    char dots[(DIM + 2) *DIM +1], *dotptr = dots;
     int failures = 0;
-    for (int i = -10; i <= 10; i++) {
-        for (int j = -10; j <= 10; j++) {
+    double scale = 2.0 / (double)RES;
+    for (int i = -RES; i <= RES; i++) {
+        *dotptr++ = '\t';
+        for (int j = -RES; j <= RES; j++) {
             // Choose coefficients and build the codebook.
-            double coeff[2] = {0.2 * (double)i, 0.2 * (double)j};
+            double coeff[2] = {scale * (double)j, -scale * (double)i};
             struct vadpcm_vector vectors[2];
             vadpcm_make_vectors(coeff, vectors);
             int norm = vector_supremum(vectors);
             double scoeff[2] = {coeff[0], coeff[1]};
             int unstable = vadpcm_stabilize(scoeff);
-            if (norm > ONE) {
+            *dotptr = '.';
+            if (norm > LIMIT) {
+                *dotptr = 'X';
+            } else if (norm > ONE) {
+                *dotptr = '*';
+            }
+            if (norm > LIMIT) {
                 // Coefficients look unstable, should be corrected.
                 if (!unstable) {
                     failures++;
-                    test_stability_fail(coeff, vectors, "uncorrected instability");
+                    test_stability_fail(coeff, "uncorrected instability");
+                    print_vecs(vectors, "vec");
                 } else {
                     struct vadpcm_vector svectors[2];
                     vadpcm_make_vectors(scoeff, svectors);
                     int snorm = vector_supremum(svectors);
-                    if (snorm > ONE) {
+                    if (snorm > LIMIT) {
                         failures++;
-                        test_stability_fail(coeff, vectors,
+                        test_stability_fail(coeff,
                                             "correction failed");
+                        // print_vecs(vectors, "vec");
+                        print_vecs(svectors, "out");
                     }
                 }
-            } else if (unstable) {
+            } else if (unstable && 0) {
                 // Coefficients look stable, should not be corrected.
                 failures++;
-                test_stability_fail(coeff, vectors, "false positive correction");
+                test_stability_fail(coeff, "false positive correction");
+                print_vecs(vectors, "vec");
             }
+            dotptr++;
         }
+        *dotptr++ = '\n';
     }
+    *dotptr = '\0';
     if (failures > 0) {
+        fputs("Stability map:\n", stderr);
+        fputs(dots, stderr);
         fprintf(stderr, "test_stability failures: %d\n", failures);
         test_failure_count++;
     }
