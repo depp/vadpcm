@@ -204,7 +204,7 @@ void test_stability(void) {
                     struct vadpcm_vector svectors[2];
                     vadpcm_make_vectors(scoeff, svectors);
                     int snorm = vector_supremum(svectors);
-                    if (snorm > ONE && 0) {
+                    if (snorm > ONE) {
                         failures++;
                         test_stability_fail(coeff, vectors,
                                             "correction failed");

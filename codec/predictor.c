@@ -161,15 +161,29 @@ void vadpcm_solve(const double corr[restrict static 6],
 }
 
 int vadpcm_stabilize(double coeff[restrict static 2]) {
-    double scale1 = -coeff[1];
-    double scale2 = fabs(coeff[0]) + coeff[1];
-    double scale = scale1 > scale2 ? scale1: scale2;
-    if (scale <= 1.0) {
-        return 0;
+    if (coeff[1] < -1.0) {
+        coeff[1] = -1.0;
+        if (coeff[0] < -1.0) {
+            coeff[0] = -1.0;
+        } else if (coeff[0] > 1.0) {
+            coeff[0] = 1.0;
+        }
+        return 1;
     }
-    coeff[0] /= scale;
-    coeff[1] /= scale;
-    return 1;
+    if (coeff[0] > 0.0) {
+        if (coeff[1] + coeff[0] > 1.0) {
+            coeff[0] = 0.0;
+            coeff[1] = 0.0;
+            return 1;
+        }
+    } else {
+        if (coeff[1] - coeff[0] > 1.0) {
+            coeff[0] = 0.0;
+            coeff[1] = 0.0;
+            return 1;
+        }
+    }
+    return 0;
 }
 
 // Refine (improve) the existing predictor assignments. Does not assign
