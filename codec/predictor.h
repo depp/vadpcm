@@ -65,6 +65,11 @@ void vadpcm_meancorrs(size_t frame_count, int predictor_count,
 void vadpcm_solve(const double corr[restrict static 6],
                   double coeff[restrict static 2]);
 
+// Adjust predictor coefficients to make them stable. Return 0 if the input
+// coefficients are stable and 1 if the input coefficients are unstable and
+// were modified.
+int vadpcm_stabilize(double coeff[restrict static 2]);
+
 // Assign a predictor to each frame.
 vadpcm_error vadpcm_assign_predictors(size_t frame_count, int predictor_count,
                                       const float (*restrict corr)[6],

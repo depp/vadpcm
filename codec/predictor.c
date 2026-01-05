@@ -160,6 +160,18 @@ void vadpcm_solve(const double corr[restrict static 6],
     coeff[!pivot] = y3;
 }
 
+int vadpcm_stabilize(double coeff[restrict static 2]) {
+    double scale1 = -coeff[1];
+    double scale2 = fabs(coeff[0]) + coeff[1];
+    double scale = scale1 > scale2 ? scale1: scale2;
+    if (scale <= 1.0) {
+        return 0;
+    }
+    coeff[0] /= scale;
+    coeff[1] /= scale;
+    return 1;
+}
+
 // Refine (improve) the existing predictor assignments. Does not assign
 // unassigned predictors. Record the amount of error, squared, for each frame.
 // Returns the index of an unassigned predictor, or predictor_count, if no

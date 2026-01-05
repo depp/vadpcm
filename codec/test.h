@@ -37,3 +37,6 @@ void test_autocorr(void);
 
 // Predictor solver test.
 void test_solve(void);
+
+// Coefficient stability test.
+void test_stability(void);

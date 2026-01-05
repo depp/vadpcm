@@ -3,11 +3,18 @@
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #pragma once
 
+#include "codec/vadpcm.h"
+
 #include <stddef.h>
 #include <stdint.h>
 
 struct vadpcm_vector;
 struct vadpcm_stats;
+
+// Calculate codebook vectors for one predictor, given the predictor
+// coefficients.
+void vadpcm_make_vectors(const double coeff[restrict static 2],
+                         struct vadpcm_vector vectors[restrict static 2]);
 
 // Encode audio as VADPCM, given the assignment of each frame to a predictor.
 void vadpcm_encode_data(size_t frame_count, void *restrict dest,

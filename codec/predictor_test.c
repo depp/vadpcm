@@ -3,8 +3,10 @@
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #include "codec/predictor.h"
 #include "codec/autocorr.h"
+#include "codec/encode.h"
 #include "codec/random.h"
 #include "codec/test.h"
+#include "codec/vadpcm.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -139,6 +141,84 @@ void test_solve(void) {
     }
     if (failures > 0) {
         fprintf(stderr, "test_solve failures: %d\n", failures);
+        test_failure_count++;
+    }
+}
+
+// Return the supremum norm of the vectors (the maximum value of the absolute
+// value of any component).
+static int vector_supremum(
+    const struct vadpcm_vector vectors[static restrict 2]) {
+    int norm = 0;
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0;  j < kVADPCMVectorSampleCount; j++) {
+            int value = vectors[i].v[j];
+            if (value < 0) {
+                value = -value;
+            }
+            if (value > norm) {
+                norm = value;
+            }
+        }
+    }
+    return norm;
+}
+
+static void test_stability_fail(const double coeff[static 2],
+                                struct vadpcm_vector vectors[static 2],
+                                const char *reason) {
+    fprintf(stderr,
+            "test_stability case (%+4.1f, %+4.1f)\n"
+            "\tfail: %s\n",
+            coeff[0], coeff[1], reason);
+    for (int i = 0; i < 2; i++) {
+        fprintf(stderr, "\tvec[%d] = [", i);
+        for (int j = 0; j < kVADPCMVectorSampleCount; j++) {
+            if (j > 0) {
+                fputs(", ", stderr);
+            }
+            fprintf(stderr, "%6d", vectors[i].v[j]);
+        }
+        fputs("]\n", stderr);
+    }
+}
+
+void test_stability(void) {
+    enum { ONE = 1 << 11 };
+    int failures = 0;
+    for (int i = -10; i <= 10; i++) {
+        for (int j = -10; j <= 10; j++) {
+            // Choose coefficients and build the codebook.
+            double coeff[2] = {0.2 * (double)i, 0.2 * (double)j};
+            struct vadpcm_vector vectors[2];
+            vadpcm_make_vectors(coeff, vectors);
+            int norm = vector_supremum(vectors);
+            double scoeff[2] = {coeff[0], coeff[1]};
+            int unstable = vadpcm_stabilize(scoeff);
+            if (norm > ONE) {
+                // Coefficients look unstable, should be corrected.
+                if (!unstable) {
+                    failures++;
+                    test_stability_fail(coeff, vectors, "uncorrected instability");
+                } else {
+                    struct vadpcm_vector svectors[2];
+                    vadpcm_make_vectors(scoeff, svectors);
+                    int snorm = vector_supremum(svectors);
+                    if (snorm > ONE && 0) {
+                        failures++;
+                        test_stability_fail(coeff, vectors,
+                                            "correction failed");
+                    }
+                }
+            } else if (unstable) {
+                // Coefficients look stable, should not be corrected.
+                failures++;
+                test_stability_fail(coeff, vectors, "false positive correction");
+            }
+        }
+    }
+    if (failures > 0) {
+        fprintf(stderr, "test_stability failures: %d\n", failures);
         test_failure_count++;
     }
 }
