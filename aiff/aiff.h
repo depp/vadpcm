@@ -3,20 +3,16 @@
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #pragma once
 
+#include "util/extended.h"
+
 #include <stddef.h>
 #include <stdint.h>
 
-// Extended precision floating-point number.
-struct extended {
-    uint16_t sign_exponent;
-    uint16_t fraction[4];
-};
-
 // Supported AIFF codecs.
-enum {
+typedef enum {
     kAIFFCodecPCM,
     kAIFFCodecVADPCM,
-};
+} aiff_codec;
 
 // A parsed AIFF or AIFF-C file.
 struct aiff_data {
@@ -24,7 +20,7 @@ struct aiff_data {
     uint32_t num_sample_frames;
     uint32_t sample_size;
     struct extended sample_rate;
-    int codec; // e.g. kAIFFCodecPCM
+    aiff_codec codec;
 
     const void *audio_ptr;
     size_t audio_size;

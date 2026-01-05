@@ -7,9 +7,18 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+void input_file_destroy(struct input_file *file) {
+    int r = munmap(file->data, file->size);
+    if (r != 0) {
+        LOG_ERROR_ERRNO(errno, "munmap");
+        abort();
+    }
+}
 
 // Benign comparison between off_t and size_t below.
 #pragma GCC diagnostic ignored "-Wsign-compare"

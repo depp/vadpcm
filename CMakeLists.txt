@@ -72,6 +72,7 @@ add_executable(vadpcmenc
   util/file.c
   util/log.c
   util/swap.c
+  vadpcm/audio_read_pcm.c
   vadpcm/vadpcmenc.c
 )
 target_link_libraries(vadpcmenc vadpcm ${MATH_LIBRARY})

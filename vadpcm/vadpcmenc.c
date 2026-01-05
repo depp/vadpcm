@@ -1,9 +1,9 @@
 // Copyright 2026 Dietrich Epp.
 // This file is part of VADPCM. VADPCM is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
-#include "aiff/aiff.h"
 #include "codec/vadpcm.h"
 #include "util/util.h"
+#include "vadpcm/audio.h"
 
 #include <getopt.h>
 #include <inttypes.h>
@@ -11,11 +11,6 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-
-// Maximum number of samples in an input file. This prevents the number of
-// frames from overflowing a uint32_t after padding.
-#define MAX_INPUT_LENGTH (~((uint32_t)(kVADPCMFrameSampleCount - 1)))
 
 enum {
     kDefaultPredictorCount = 4,
@@ -30,13 +25,6 @@ static const char HELP[] =
     "  -h, --help          Show this help\n"
     "  -p, --predictors n  Set the number of predictors to use (1..16, default "
     "4)\n";
-
-// Copy 16-bit big-endian samples into the destination.
-static void copy_samples(int16_t *dest, const uint8_t *src, size_t n) {
-    for (size_t i = 0; i < n; i++) {
-        dest[i] = ((uint16_t)src[2 * i] << 8) | (uint16_t)src[2 * i + 1];
-    }
-}
 
 int main(int argc, char **argv) {
     static const struct option long_options[] = {
@@ -82,51 +70,13 @@ int main(int argc, char **argv) {
     LOG_DEBUG("input: %s", input_file);
     LOG_DEBUG("output: %s", output_file);
     LOG_DEBUG("predictor count: %d", predictor_count);
-    struct input_file input;
-    int r = input_file_read(&input, input_file);
+    struct audio_data audio;
+    int r = audio_read_pcm(&audio, input_file);
     if (r != 0) {
         return 1;
     }
-    struct aiff_data aiff;
-    r = aiff_parse(&aiff, input.data, input.size);
-    if (r != 0) {
-        return 1;
-    }
-    LOG_DEBUG("read input file");
-    if (aiff.codec == kAIFFCodecVADPCM) {
-        LOG_ERROR("input file is already encoded using VADPCM");
-        return 1;
-    }
-    if (aiff.num_channels != 1) {
-        LOG_ERROR("only mono files are supported; channels=%" PRIu32,
-                  aiff.num_channels);
-        return 1;
-    }
-    if (aiff.sample_size != 16) {
-        LOG_ERROR("only 16-bit samples are supported; bits=%" PRIu32,
-                  aiff.sample_size);
-        return 1;
-    }
-    if (aiff.num_sample_frames > MAX_INPUT_LENGTH) {
-        LOG_ERROR("input file is too long; length=%" PRIu32
-                  ", maximum=%" PRIu32,
-                  aiff.num_sample_frames, MAX_INPUT_LENGTH);
-        return 1;
-    }
-
-    // PCM and VADPCM frame counts.
-    uint32_t pcm_frame_count = aiff.num_sample_frames;
     uint32_t vadpcm_frame_count =
-        pcm_frame_count / kVADPCMFrameSampleCount +
-        ((pcm_frame_count & (kVADPCMFrameSampleCount - 1)) != 0);
-    // PCM data is padded to a multiple of the VADPCM frame size. No overflow
-    // due to MAX_INPUT_LENGTH check.
-    uint32_t padded_frame_count = pcm_frame_count * kVADPCMFrameSampleCount;
-    int16_t *pcm_data = XMALLOC(padded_frame_count, sizeof(*pcm_data));
-    copy_samples(pcm_data, aiff.audio_ptr, pcm_frame_count);
-    memset(pcm_data + pcm_frame_count, 0,
-           sizeof(int16_t) * (padded_frame_count - pcm_frame_count));
-
+        audio.padded_sample_count / kVADPCMFrameSampleCount;
     void *vadpcm_data = XMALLOC(vadpcm_frame_count, kVADPCMFrameByteSize);
     struct vadpcm_params params = {
         .predictor_count = predictor_count,
@@ -134,7 +84,7 @@ int main(int argc, char **argv) {
     struct vadpcm_vector codebook[kVADPCMMaxPredictorCount];
     struct vadpcm_stats stats;
     vadpcm_error err = vadpcm_encode(&params, codebook, vadpcm_frame_count,
-                                     vadpcm_data, pcm_data, &stats);
+                                     vadpcm_data, audio.sample_data, &stats);
     if (err != 0) {
         LOG_ERROR("encoding failed: %s", vadpcm_error_name(err));
         return 1;

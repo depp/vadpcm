@@ -111,4 +111,8 @@ struct input_file {
     size_t size;
 };
 
+// Free resources used by an input file.
+void input_file_destroy(struct input_file *file);
+
+// Read an entire file into memory. May use mmap.
 int input_file_read(struct input_file *file, const char *filename);
