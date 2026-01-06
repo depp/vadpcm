@@ -11,6 +11,8 @@ option(ENABLE_WARNINGS "enable C warning flags")
 option(ENABLE_WERROR "treat warnings as errors")
 set(SANITIZERS OFF CACHE STRING "enable sanitizers")
 
+add_compile_options(-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}/=)
+
 if(ENABLE_WARNINGS)
   add_compile_options(
     -Wall -Wextra -Wpointer-arith -Wwrite-strings -Wmissing-prototypes

@@ -30,25 +30,11 @@ static const struct log_level LEVELS[] = {
     [LEVEL_DEBUG] = {.color = "35", .name = "Debug"},
 };
 
-static const char *strip_file_prefix(const char *file) {
-    const char *ref = __FILE__;
-    size_t ref_len = strlen(ref);
-    size_t file_len = strlen(file);
-    enum { UTIL_LOG_LEN = 10 };
-    if (ref_len > UTIL_LOG_LEN) {
-        ref_len -= UTIL_LOG_LEN;
-        if (file_len > ref_len && memcmp(ref, file, ref_len) == 0) {
-            file += ref_len;
-        }
-    }
-    return file;
-}
-
 static void log_msg(int level, const char *file, int line, bool has_errcode,
                     int errcode, const char *fmt, va_list ap) {
     flockfile(stderr);
     fprintf(stderr, "\33[%sm%s\33[0m: %s:%d: ", LEVELS[level].color,
-            LEVELS[level].name, strip_file_prefix(file), line);
+            LEVELS[level].name, file, line);
     vfprintf(stderr, fmt, ap);
     if (has_errcode) {
         fputs(": ", stderr);
