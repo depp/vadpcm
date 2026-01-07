@@ -42,7 +42,14 @@ void vadpcm_best_error(size_t frame_count, const float (*restrict corr)[6],
         }
         double coeff[2];
         vadpcm_solve(fcorr, coeff);
-        best_error[frame] = (float)vadpcm_eval_solved(fcorr, coeff);
+        float error;
+        if (vadpcm_stabilize(coeff) == 0) {
+            error = (float)vadpcm_eval_solved(fcorr, coeff);
+        } else {
+            float fcoeff[2] = {coeff[0], coeff[1]};
+            error = (float)vadpcm_eval(corr[frame], fcoeff);
+        }
+        best_error[frame] = error;
     }
 }
 
@@ -219,6 +226,7 @@ static int vadpcm_refine_predictors(size_t frame_count, int predictor_count,
         if (count[i] > 0) {
             double dcoeff[2];
             vadpcm_solve(pcorr[i], dcoeff);
+            vadpcm_stabilize(dcoeff);
             for (int j = 0; j < 2; j++) {
                 coeff[active_count][j] = dcoeff[j];
             }
