@@ -3,10 +3,23 @@
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #pragma once
 
+#include "codec/vadpcm.h"
 #include "util/extended.h"
 
 #include <stddef.h>
 #include <stdint.h>
+
+// FVER timestamp for version 1 of the AIFF-C format. This is the only known
+// version.
+#define kAIFCVersion1 ((uint32_t)0xA2805140)
+
+// Types of AIFF file.
+typedef enum {
+    // Original AIFF spec.
+    kAIFF,
+    // Newer, extended AIFF-C spec.
+    kAIFFC,
+} aiff_version;
 
 // Supported AIFF codecs.
 typedef enum {
@@ -14,18 +27,36 @@ typedef enum {
     kAIFFCodecVADPCM,
 } aiff_codec;
 
+// VADPCM codebook .
+struct aiff_vadpcm_codebook {
+    int order;
+    int predictor_count;
+    struct vadpcm_vector *codebook;
+};
+
 // A parsed AIFF or AIFF-C file.
 struct aiff_data {
+    aiff_version version;
+    uint32_t version_timestamp; // FVER for AIFF-C.
+
+    // COMM chunk.
     uint32_t num_channels;
     uint32_t num_sample_frames;
     uint32_t sample_size;
     struct extended sample_rate;
     aiff_codec codec;
 
+    // SSND chunk.
     const void *audio_ptr;
     size_t audio_size;
+
+    // VADPCM codebook, if codec is VADPCM.
+    struct aiff_vadpcm_codebook vadpcm_codebook;
 };
 
 // Parse an AIFF or AIFF-C file. Returns 0 on success.
 int aiff_parse(struct aiff_data *restrict aiff, const uint8_t *ptr,
                size_t size);
+
+// Write out an AIFF or AIFF-C file to disk. Returns 0 on success.
+int aiff_write(const struct aiff_data *restrict aiff, const char *filename);

@@ -1,6 +1,7 @@
 // Copyright 2026 Dietrich Epp.
 // This file is part of VADPCM. VADPCM is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
+#include "aiff/aiff.h"
 #include "codec/vadpcm.h"
 #include "util/util.h"
 #include "vadpcm/audio.h"
@@ -95,6 +96,28 @@ int main(int argc, char **argv) {
     LOG_INFO("signal level: %.2f dB", signal_level);
     LOG_INFO("error level: %.2f dB", error_level);
     LOG_INFO("SNR: %.2f dB", signal_level - error_level);
+
+    struct aiff_data aiff = {
+        .version = kAIFFC,
+        .version_timestamp = kAIFCVersion1,
+        .num_channels = 1,
+        .num_sample_frames = audio.padded_sample_count,
+        .sample_size = 16,
+        .sample_rate = audio.sample_rate,
+        .codec = kAIFFCodecVADPCM,
+        .audio_ptr = vadpcm_data,
+        .audio_size = vadpcm_frame_count * kVADPCMFrameByteSize,
+        .vadpcm_codebook =
+            {
+                .order = kVADPCMEncodeOrder,
+                .predictor_count = predictor_count,
+                .codebook = codebook,
+            },
+    };
+    r = aiff_write(&aiff, output_file);
+    if (r != 0) {
+        return 1;
+    }
 
     LOG_INFO("ok");
     free(audio.sample_data);

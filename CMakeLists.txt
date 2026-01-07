@@ -79,6 +79,7 @@ endif()
 
 add_executable(vadpcmenc
   aiff/parse.c
+  aiff/write.c
   util/alloc.c
   util/binary.c
   util/extended.c

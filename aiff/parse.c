@@ -83,9 +83,11 @@ int aiff_parse(struct aiff_data *restrict aiff, const uint8_t *ptr,
     bool is_aiffc;
     if (form_type == AIFC_KIND) {
         is_aiffc = true;
+        aiff->version = kAIFF;
         LOG_DEBUG("type: AIFF");
     } else if (form_type == AIFF_KIND) {
         is_aiffc = false;
+        aiff->version = kAIFFC;
         LOG_DEBUG("type: AIFF-C");
     } else {
         char buf[FOURCC_BUFSZ];
@@ -93,6 +95,7 @@ int aiff_parse(struct aiff_data *restrict aiff, const uint8_t *ptr,
         LOG_ERROR("form type is not 'AIFF' or 'AIFC'; type=%s", buf);
         return -1;
     }
+    aiff->version_timestamp = 0;
     uint32_t content_size = read32be(ptr + 4);
     LOG_DEBUG("size=%" PRIu32, content_size);
     if (content_size > size - 8) {
@@ -163,8 +166,15 @@ int aiff_parse(struct aiff_data *restrict aiff, const uint8_t *ptr,
                 aiff->audio_size = chunk_size - 8 - ssnd_offset;
             }
             break;
-        /* case CHUNK_FVER: */
-        /*     break; */
+        case CHUNK_FVER:
+            if (chunk_size < 4) {
+                LOG_ERROR("FVER chunk is too small; size=%" PRIu32
+                          ", minimum=4",
+                          chunk_size);
+                return -1;
+            }
+            aiff->version_timestamp = read32be(cptr);
+            break;
         /* case CHUNK_MARK: */
         /*     break; */
         /* case CHUNK_INST: */

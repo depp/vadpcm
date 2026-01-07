@@ -38,8 +38,11 @@ void log_debug(const char *file, int line, const char *fmt, ...)
 
 void *xmalloc(const char *file, int line, size_t nmemb, size_t size)
     __attribute__((malloc, alloc_size(3, 4)));
+void *xcalloc(const char *file, int line, size_t nmemb, size_t size)
+    __attribute__((malloc, alloc_size(3, 4)));
 
 #define XMALLOC(nmemb, size) xmalloc(__FILE__, __LINE__, nmemb, size)
+#define XCALLOC(nmemb, size) xcalloc(__FILE__, __LINE__, nmemb, size)
 
 // ============================================================================
 // FOURCC
@@ -58,7 +61,7 @@ enum {
 void format_fourcc(char *buf, uint32_t fourcc);
 
 // ============================================================================
-// File Input
+// File Input and Output
 // ============================================================================
 
 struct input_file {
@@ -71,3 +74,12 @@ void input_file_destroy(struct input_file *file);
 
 // Read an entire file into memory. May use mmap.
 int input_file_read(struct input_file *file, const char *filename);
+
+struct bytestring {
+    const void *ptr;
+    size_t size;
+};
+
+// Write an output file, consisting of one or more parts.
+int output_file_write(const char *filename, const struct bytestring *data,
+                      size_t count);
