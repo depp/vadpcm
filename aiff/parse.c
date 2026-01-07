@@ -19,22 +19,15 @@
 #pragma GCC diagnostic ignored "-Wtype-limits"
 #endif
 
-// Read an unaligned 32-bit value.
-static uint32_t read32(const void *ptr) {
-    uint32_t x;
-    memcpy(&x, ptr, sizeof(uint32_t));
-    return x;
+static void aiff_parse_comm(struct aiff_data *aiff, const uint8_t *ptr) {
+    aiff->num_channels = read16be(ptr);
+    aiff->num_sample_frames = read32be(ptr + 2);
+    aiff->sample_size = read16be(ptr + 6);
+    aiff->sample_rate.sign_exponent = read16be(ptr + 8);
+    aiff->sample_rate.fraction = read64be(ptr + 10);
 }
 
-static void aiff_parse_comm(struct aiff_data *aiff,
-                            const struct aiff_comm *comm) {
-    aiff->num_channels = SWAP16_BE(comm->num_channels);
-    aiff->num_sample_frames = SWAP32_BE(read32(comm->num_sample_frames));
-    aiff->sample_size = SWAP16_BE(comm->sample_size);
-    aiff->sample_rate = comm->sample_rate;
-}
-
-static int aiff_parse_comm1(struct aiff_data *aiff, const void *ptr,
+static int aiff_parse_comm1(struct aiff_data *aiff, const uint8_t *ptr,
                             uint32_t size) {
     if (size != 18) {
         LOG_ERROR("COMM chunk too small; size=%" PRIu32 ", minimum=18", size);
@@ -45,7 +38,7 @@ static int aiff_parse_comm1(struct aiff_data *aiff, const void *ptr,
     return 0;
 }
 
-static int aiff_parse_comm2(struct aiff_data *aiff, const void *ptr,
+static int aiff_parse_comm2(struct aiff_data *aiff, const uint8_t *ptr,
                             uint32_t size) {
     if (size < 23) {
         LOG_ERROR("COMM chunk is too small; size=%" PRIu32 ", minimum=23",
@@ -53,7 +46,7 @@ static int aiff_parse_comm2(struct aiff_data *aiff, const void *ptr,
         return -1;
     }
     aiff_parse_comm(aiff, ptr);
-    uint32_t id = read32((const char *)ptr + 18);
+    uint32_t id = read32be(ptr + 18);
     switch (id) {
     case CODEC_PCM:
         aiff->codec = kAIFFCodecPCM;
@@ -71,34 +64,34 @@ static int aiff_parse_comm2(struct aiff_data *aiff, const void *ptr,
     return 0;
 }
 
-int aiff_parse(struct aiff_data *aiff, const void *ptr, size_t size) {
+int aiff_parse(struct aiff_data *aiff, const uint8_t *ptr, size_t size) {
     // Read the header.
-    _Static_assert(sizeof(struct aiff_header) == 12, "must be 12");
     if (size < 12) {
         LOG_ERROR("file size is too small; size=%zu, minimum=12", size);
         return -1;
     }
-    const struct aiff_header *header = ptr;
-    if (header->chunk_id != AIFF_CKID) {
+    uint32_t chunk_id = read32be(ptr);
+    if (chunk_id != AIFF_CKID) {
         char buf[FOURCC_BUFSZ];
-        format_fourcc(buf, header->chunk_id);
+        format_fourcc(buf, chunk_id);
         LOG_ERROR("bad container chunk; id=%s, expected='FORM'", buf);
         return -1;
     }
+    uint32_t form_type = read32be(ptr + 8);
     bool is_aiffc;
-    if (header->form_type == AIFC_KIND) {
+    if (form_type == AIFC_KIND) {
         is_aiffc = true;
         LOG_DEBUG("type: AIFF");
-    } else if (header->form_type == AIFF_KIND) {
+    } else if (form_type == AIFF_KIND) {
         is_aiffc = false;
         LOG_DEBUG("type: AIFF-C");
     } else {
         char buf[FOURCC_BUFSZ];
-        format_fourcc(buf, header->form_type);
+        format_fourcc(buf, form_type);
         LOG_ERROR("form type is not 'AIFF' or 'AIFC'; type=%s", buf);
         return -1;
     }
-    uint32_t content_size = SWAP32_BE(header->chunk_size);
+    uint32_t content_size = read32be(ptr + 4);
     LOG_DEBUG("size=%" PRIu32, content_size);
     if (content_size > size - 8) {
         LOG_ERROR("short AIFF file; body size=%" PRIu32 ", file size=%zu",
@@ -108,27 +101,27 @@ int aiff_parse(struct aiff_data *aiff, const void *ptr, size_t size) {
 
     // Read all the chunks in the file.
     ptrdiff_t offset = 12;
-    ptrdiff_t end = content_size + 8;
+    ptrdiff_t end = (ptrdiff_t)content_size + 8;
     bool has_comm = false;
     bool has_ssnd = false;
     while (offset < end) {
-        if ((ptrdiff_t)sizeof(struct aiff_chunk) > end - offset) {
+        if (8 > end - offset) {
             LOG_ERROR("incomplete chunk header; offset=%td", offset);
             return -1;
         }
-        const struct aiff_chunk *chunk =
-            (const void *)((const char *)ptr + offset);
-        offset += sizeof(struct aiff_chunk);
-        uint32_t chunk_size = SWAP32_BE(chunk->chunk_size);
+        const uint8_t *cptr = ptr + offset;
+        chunk_id = read32be(cptr);
+        uint32_t chunk_size = read32be(cptr + 4);
         uint32_t chunk_size_padded = chunk_size + (chunk_size & 1);
+        offset += 8;
+        cptr += 8;
         if (chunk_size_padded < chunk_size ||
             chunk_size_padded > end - offset) {
             LOG_ERROR("invalid chunk size; offset=%td, size=%" PRIu32, offset,
                       chunk_size);
             return -1;
         }
-        const void *chunk_ptr = (const char *)ptr + offset;
-        switch (chunk->chunk_id) {
+        switch (chunk_id) {
         case CHUNK_COMM:
             if (has_comm) {
                 LOG_ERROR("multiple COMM chunks found");
@@ -137,9 +130,9 @@ int aiff_parse(struct aiff_data *aiff, const void *ptr, size_t size) {
             has_comm = true;
             int r;
             if (is_aiffc) {
-                r = aiff_parse_comm2(aiff, chunk_ptr, chunk_size);
+                r = aiff_parse_comm2(aiff, cptr, chunk_size);
             } else {
-                r = aiff_parse_comm1(aiff, chunk_ptr, chunk_size);
+                r = aiff_parse_comm1(aiff, cptr, chunk_size);
             }
             if (r != 0) {
                 return r;
@@ -158,13 +151,14 @@ int aiff_parse(struct aiff_data *aiff, const void *ptr, size_t size) {
             }
             has_ssnd = true;
             {
-                uint32_t offset = SWAP32_BE(read32(chunk_ptr));
-                if (offset > chunk_size - 8) {
-                    LOG_ERROR("invalid SSND offfset; offset=%" PRIu32, offset);
+                uint32_t ssnd_offset = read32be(cptr);
+                if (ssnd_offset > chunk_size - 8) {
+                    LOG_ERROR("invalid SSND offfset; offset=%" PRIu32,
+                              ssnd_offset);
                     return -1;
                 }
-                aiff->audio_ptr = (const char *)chunk_ptr + offset + 8;
-                aiff->audio_size = chunk_size - 8 - offset;
+                aiff->audio_ptr = cptr + ssnd_offset + 8;
+                aiff->audio_size = chunk_size - 8 - ssnd_offset;
             }
             break;
         /* case CHUNK_FVER: */
@@ -177,7 +171,7 @@ int aiff_parse(struct aiff_data *aiff, const void *ptr, size_t size) {
         /*     break; */
         default: {
             char buf[FOURCC_BUFSZ];
-            format_fourcc(buf, chunk->chunk_id);
+            format_fourcc(buf, chunk_id);
             LOG_INFO("unknown chunk: %s", buf);
         } break;
         }

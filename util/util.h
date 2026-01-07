@@ -42,57 +42,38 @@ void *xmalloc(const char *file, int line, size_t nmemb, size_t size)
 #define XMALLOC(nmemb, size) xmalloc(__FILE__, __LINE__, nmemb, size)
 
 // ============================================================================
-// Byte Order
+// Serialization / Deserialization
 // ============================================================================
 
-// https://github.com/cpredef/predef/blob/master/Endianness.md
-
-#define FOURCC_NATIVE(c1, c2, c3, c4)                                          \
-    (((uint32_t)(c1) << 24) | ((uint32_t)(c2) << 16) | ((uint32_t)(c3) << 8) | \
-     (uint32_t)(c4))
-#define FOURCC_SWAPPED(c1, c2, c3, c4) FOURCC_NATIVE(c4, c3, c2, c1)
-
-// Swap the byte order on a 16-bit value.
-inline uint16_t swap16(uint16_t x) {
-    return __builtin_bswap16(x);
+inline uint16_t read16be(const uint8_t *ptr) {
+    return ((uint16_t)ptr[0] << 8) | (uint16_t)ptr[1];
 }
 
-// Swap the byte order on a 32-bit value.
-inline uint32_t swap32(uint32_t x) {
-    return __builtin_bswap32(x);
+inline uint32_t read32be(const uint8_t *ptr) {
+    return ((uint32_t)ptr[0] << 24) | //
+           ((uint32_t)ptr[1] << 16) | //
+           ((uint32_t)ptr[2] << 8) |  //
+           (uint32_t)ptr[3];
 }
 
-// Return a 16-bit value.
-inline uint16_t id16(uint16_t x) {
-    return x;
+inline uint64_t read64be(const uint8_t *ptr) {
+    return ((uint64_t)ptr[0] << 56) | //
+           ((uint64_t)ptr[1] << 48) | //
+           ((uint64_t)ptr[2] << 40) | //
+           ((uint64_t)ptr[3] << 32) | //
+           ((uint64_t)ptr[4] << 24) | //
+           ((uint64_t)ptr[5] << 16) | //
+           ((uint64_t)ptr[6] << 8) |  //
+           (uint64_t)ptr[7];
 }
-
-// Return a 32-bit value.
-inline uint32_t id32(uint32_t x) {
-    return x;
-}
-
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-#define FOURCC_LE FOURCC_NATIVE
-#define FOURCC_BE FOURCC_SWAPPED
-#define SWAP16_LE id16
-#define SWAP32_LE id32
-#define SWAP16_BE swap16
-#define SWAP32_BE swap32
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-#define FOURCC_LE FOURCC_SWAPPED
-#define FOURCC_BE FOURCC_NATIVE
-#define SWAP16_LE swap16
-#define SWAP32_LE swap32
-#define SWAP16_BE id16
-#define SWAP32_BE id32
-#else
-#error "Unknown byte order"
-#endif
 
 // ============================================================================
 // FOURCC
 // ============================================================================
+
+#define FOURCC(c1, c2, c3, c4)                                                 \
+    (((uint32_t)(c1) << 24) | ((uint32_t)(c2) << 16) | ((uint32_t)(c3) << 8) | \
+     (uint32_t)(c4))
 
 enum {
     // Buffer size for formatting a four character code.

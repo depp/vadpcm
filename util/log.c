@@ -86,7 +86,7 @@ static char hexdigit(int x) {
 void format_fourcc(char *buf, uint32_t fourcc) {
     *buf++ = '\'';
     for (int i = 0; i < 4; i++) {
-        int c = (fourcc >> (i * 8)) & 0xff;
+        int c = (fourcc >> (24 - (i * 8))) & 0xff;
         if (32 <= c && c <= 126) {
             if (c == '\'' || c == '\'') {
                 *buf++ = '\\';

@@ -80,9 +80,9 @@ endif()
 add_executable(vadpcmenc
   aiff/parse.c
   util/alloc.c
+  util/binary.c
   util/file.c
   util/log.c
-  util/swap.c
   vadpcm/audio_read_pcm.c
   vadpcm/vadpcmenc.c
 )
@@ -91,9 +91,9 @@ target_link_libraries(vadpcmenc vadpcm ${MATH_LIBRARY})
 add_executable(vadpcmstats
   aiff/parse.c
   util/alloc.c
+  util/binary.c
   util/file.c
   util/log.c
-  util/swap.c
   vadpcm/audio_read_pcm.c
   vadpcm/vadpcmstats.c
 )

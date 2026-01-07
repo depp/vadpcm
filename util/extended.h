@@ -8,5 +8,5 @@
 // Extended precision floating-point number.
 struct extended {
     uint16_t sign_exponent;
-    uint16_t fraction[4];
+    uint64_t fraction;
 };

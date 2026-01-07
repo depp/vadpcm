@@ -3,7 +3,6 @@
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #include "util/util.h"
 
-uint16_t swap16(uint16_t x);
-uint32_t swap32(uint32_t x);
-uint16_t id16(uint16_t x);
-uint32_t id32(uint32_t x);
+uint16_t read16be(const uint8_t *ptr);
+uint32_t read32be(const uint8_t *ptr);
+uint64_t read64be(const uint8_t *ptr);
