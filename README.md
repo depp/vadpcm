@@ -7,9 +7,17 @@ This is an implementation of the VADPCM codec. The VADPCM codec is often used by
 
 VADPCM is licensed under the terms of the Mozilla Public License Version 2.0. See LICENSE.txt for details.
 
+## Usage
+
+Convert an AIFF file to use VADPCM:
+
+    vadpcmenc input.aiff output.aifc
+
+The corresponding vadpcmdec tool is currently broken while it is being ported to C.
+
 ## Project Status
 
-The project is, as of September 2023, under active development. Version 1.0 is expected within the next six months.
+The project is, as of January 2026, under active development. Version 1.0 is expected within the next six months.
 
 ## What is VADPCM?
 
@@ -22,22 +30,6 @@ The audio quality of VADPCM is good, but this codec is not competitive with code
 VADPCM uses a codebook of second-order linear predictors, and encodes the residuals using 4 bits per sample. Each block of 16 samples shares the same predictor and scaling factor. The predictors in the codebook are stored in a vector format, which makes it easy to write a high-performance decoder using SIMD instructions. The Nintendo 64 has a coprocessor, called the Reality Signal Processor, with SIMD capabilities.
 
 ## Development
-
-This project supports two build systems: Bazel and CMake. You can pick your preferred build system, although CMake support is currently incomplete.
-
-### Bazel
-
-The primary encoder tool is `//vadpcm`. It is writtin in Go.
-
-    bazel build -c opt //vadpcm
-
-The encoder / decoder library, written in C, is `//codec`.
-
-    bazel build -c opt //codec
-
-Generate the `compile_commands.json` file:
-
-    bazel run @hedron_compile_commands//:refresh_all
 
 ### CMake
 
@@ -54,3 +46,7 @@ The Ninja generator, enabled by passing `-G Ninja` to CMake, is recommended.
 Pass `-DCMAKE_BUILD_TYPE=Release` to CMake for a release build.
 
 Pass `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON` to CMake to generate the `compile_commands.json` file that Clangd uses. On Unix systems, this will be symlinked into the project source directory.
+
+### Bazel
+
+(Currently broken.)
