@@ -27,4 +27,5 @@ struct aiff_data {
 };
 
 // Parse an AIFF or AIFF-C file. Returns 0 on success.
-int aiff_parse(struct aiff_data *aiff, const uint8_t *ptr, size_t size);
+int aiff_parse(struct aiff_data *restrict aiff, const uint8_t *ptr,
+               size_t size);

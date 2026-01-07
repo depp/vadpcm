@@ -4,6 +4,7 @@
 #include "aiff/aiff.h"
 
 #include "aiff/internal.h"
+#include "util/binary.h"
 #include "util/util.h"
 
 #include <inttypes.h>
@@ -64,7 +65,8 @@ static int aiff_parse_comm2(struct aiff_data *aiff, const uint8_t *ptr,
     return 0;
 }
 
-int aiff_parse(struct aiff_data *aiff, const uint8_t *ptr, size_t size) {
+int aiff_parse(struct aiff_data *restrict aiff, const uint8_t *ptr,
+               size_t size) {
     // Read the header.
     if (size < 12) {
         LOG_ERROR("file size is too small; size=%zu, minimum=12", size);

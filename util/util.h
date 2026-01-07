@@ -42,32 +42,6 @@ void *xmalloc(const char *file, int line, size_t nmemb, size_t size)
 #define XMALLOC(nmemb, size) xmalloc(__FILE__, __LINE__, nmemb, size)
 
 // ============================================================================
-// Serialization / Deserialization
-// ============================================================================
-
-inline uint16_t read16be(const uint8_t *ptr) {
-    return ((uint16_t)ptr[0] << 8) | (uint16_t)ptr[1];
-}
-
-inline uint32_t read32be(const uint8_t *ptr) {
-    return ((uint32_t)ptr[0] << 24) | //
-           ((uint32_t)ptr[1] << 16) | //
-           ((uint32_t)ptr[2] << 8) |  //
-           (uint32_t)ptr[3];
-}
-
-inline uint64_t read64be(const uint8_t *ptr) {
-    return ((uint64_t)ptr[0] << 56) | //
-           ((uint64_t)ptr[1] << 48) | //
-           ((uint64_t)ptr[2] << 40) | //
-           ((uint64_t)ptr[3] << 32) | //
-           ((uint64_t)ptr[4] << 24) | //
-           ((uint64_t)ptr[5] << 16) | //
-           ((uint64_t)ptr[6] << 8) |  //
-           (uint64_t)ptr[7];
-}
-
-// ============================================================================
 // FOURCC
 // ============================================================================
 
