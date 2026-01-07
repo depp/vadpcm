@@ -81,6 +81,7 @@ add_executable(vadpcmenc
   aiff/parse.c
   util/alloc.c
   util/binary.c
+  util/extended.c
   util/file.c
   util/log.c
   vadpcm/audio_read_pcm.c

@@ -10,3 +10,6 @@ struct extended {
     uint16_t sign_exponent;
     uint64_t fraction;
 };
+
+// Convert an extended float to a double.
+double double_from_extended(const struct extended *extended);

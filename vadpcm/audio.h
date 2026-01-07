@@ -14,7 +14,7 @@ struct audio_data {
     uint32_t original_sample_count;
     uint32_t padded_sample_count;
     int16_t *sample_data;
-    struct extended rate;
+    struct extended sample_rate;
 };
 
 // Read PCM audio from a file.

@@ -75,6 +75,7 @@ int main(int argc, char **argv) {
     if (r != 0) {
         return 1;
     }
+    LOG_INFO("sample rate: %f", double_from_extended(&audio.sample_rate));
     uint32_t vadpcm_frame_count =
         audio.padded_sample_count / kVADPCMFrameSampleCount;
     void *vadpcm_data = XMALLOC(vadpcm_frame_count, kVADPCMFrameByteSize);

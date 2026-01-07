@@ -74,7 +74,7 @@ int audio_read_pcm(struct audio_data *restrict audio, const char *filename) {
         .original_sample_count = original_sample_count,
         .padded_sample_count = padded_sample_count,
         .sample_data = sample_data,
-        .rate = aiff.sample_rate,
+        .sample_rate = aiff.sample_rate,
     };
     input_file_destroy(&input);
     return 0;
