@@ -20,8 +20,8 @@ enum {
     kVADPCMDefaultPredictorCount = 4,
 };
 
-void vadpcm_make_vectors(const double coeff[restrict static 2],
-                         struct vadpcm_vector vectors[restrict static 2]) {
+void vadpcm_make_vectors(const double *restrict coeff,
+                         struct vadpcm_vector *restrict vectors) {
     double scale = (double)(1 << 11);
     for (int i = 0; i < 2; i++) {
         double x1 = 0.0, x2 = 0.0;

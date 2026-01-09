@@ -8,3 +8,8 @@
 # Clangd
 /compile_commands.json
 /.cache
+
+# Visual studio
+/.vs
+*.user
+x64

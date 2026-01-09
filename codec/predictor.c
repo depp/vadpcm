@@ -27,11 +27,11 @@ enum {
     kVADPCMIterations = 20,
 };
 
-float vadpcm_eval(const float corr[restrict static 6],
-                  const float coeff[restrict static 2]);
+float vadpcm_eval(const float *restrict corr,
+                  const float *restrict coeff);
 
-double vadpcm_eval_solved(const double corr[restrict static 6],
-                          const double coeff[restrict static 2]);
+double vadpcm_eval_solved(const double *restrict corr,
+                          const double *restrict coeff);
 
 void vadpcm_best_error(size_t frame_count, const float (*restrict corr)[6],
                        float *restrict best_error) {
@@ -85,8 +85,8 @@ void vadpcm_meancorrs(size_t frame_count, int predictor_count,
     }
 }
 
-void vadpcm_solve(const double corr[restrict static 6],
-                  double coeff[restrict static 2]) {
+void vadpcm_solve(const double *restrict corr,
+                  double *restrict coeff) {
     // For the autocorrelation matrix A, we want vector v which minimizes the
     // residual \epsilon,
     //
@@ -167,7 +167,7 @@ void vadpcm_solve(const double corr[restrict static 6],
     coeff[!pivot] = y3;
 }
 
-int vadpcm_stabilize(double coeff[restrict static 2]) {
+int vadpcm_stabilize(double *restrict coeff) {
     // TODO: The new coefficient calculations have not been checked closely.
     if (coeff[1] < -1.0) {
         coeff[1] = -1.0;

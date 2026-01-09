@@ -17,8 +17,8 @@
 
 // Calculate the square error, given an autocorrelation matrix and predictor
 // coefficients.
-inline float vadpcm_eval(const float corr[restrict static 6],
-                         const float coeff[restrict static 2]) {
+inline float vadpcm_eval(const float *restrict corr,
+                         const float *restrict coeff) {
     return corr[0] +                               //
            corr[2] * coeff[0] * coeff[0] +         //
            corr[5] * coeff[1] * coeff[1] +         //
@@ -28,8 +28,8 @@ inline float vadpcm_eval(const float corr[restrict static 6],
 }
 
 // Calculate the best-case error from a frame, given its solved coefficients.
-inline double vadpcm_eval_solved(const double corr[restrict static 6],
-                                 const double coeff[restrict static 2]) {
+inline double vadpcm_eval_solved(const double *restrict corr,
+                                 const double *restrict coeff) {
     // Equivalent to vadpcm_eval(), for the case where coeff are optimal for
     // this autocorrelation matrix.
     //
@@ -62,13 +62,13 @@ void vadpcm_meancorrs(size_t frame_count, int predictor_count,
 
 // Calculate the predictor coefficients, given an autocorrelation matrix. The
 // coefficients are chosen to minimize vadpcm_eval.
-void vadpcm_solve(const double corr[restrict static 6],
-                  double coeff[restrict static 2]);
+void vadpcm_solve(const double *restrict corr,
+                  double *restrict coeff);
 
 // Adjust predictor coefficients to make them stable. Return 0 if the input
 // coefficients are stable and 1 if the input coefficients are unstable and
 // were modified.
-int vadpcm_stabilize(double coeff[restrict static 2]);
+int vadpcm_stabilize(double *restrict coeff);
 
 // Assign a predictor to each frame.
 vadpcm_error vadpcm_assign_predictors(size_t frame_count, int predictor_count,
