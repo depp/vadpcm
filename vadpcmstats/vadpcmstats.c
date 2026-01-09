@@ -2,8 +2,8 @@
 // This file is part of VADPCM. VADPCM is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #include "codec/vadpcm.h"
-#include "util/util.h"
-#include "vadpcm/audio.h"
+#include "common/audio.h"
+#include "common/util.h"
 
 #include <errno.h>
 #include <getopt.h>

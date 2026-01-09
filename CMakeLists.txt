@@ -78,25 +78,25 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 endif()
 
 add_executable(vadpcmenc
-  aiff/parse.c
-  aiff/write.c
-  util/alloc.c
-  util/binary.c
-  util/extended.c
-  util/file.c
-  util/log.c
-  vadpcm/audio_read_pcm.c
-  vadpcm/vadpcmenc.c
+  common/aiff_parse.c
+  common/aiff_write.c
+  common/alloc.c
+  common/audio_read_pcm.c
+  common/binary.c
+  common/extended.c
+  common/file.c
+  common/log.c
+  vadpcmenc/vadpcmenc.c
 )
 target_link_libraries(vadpcmenc vadpcm ${MATH_LIBRARY})
 
 add_executable(vadpcmstats
-  aiff/parse.c
-  util/alloc.c
-  util/binary.c
-  util/file.c
-  util/log.c
-  vadpcm/audio_read_pcm.c
-  vadpcm/vadpcmstats.c
+  common/aiff_parse.c
+  common/alloc.c
+  common/audio_read_pcm.c
+  common/binary.c
+  common/file.c
+  common/log.c
+  vadpcmstats/vadpcmstats.c
 )
 target_link_libraries(vadpcmstats vadpcm ${MATH_LIBRARY})

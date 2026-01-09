@@ -1,10 +1,10 @@
 // Copyright 2026 Dietrich Epp.
 // This file is part of VADPCM. VADPCM is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
-#include "aiff/aiff.h"
 #include "codec/vadpcm.h"
-#include "util/util.h"
-#include "vadpcm/audio.h"
+#include "common/aiff.h"
+#include "common/audio.h"
+#include "common/util.h"
 
 #include <getopt.h>
 #include <inttypes.h>

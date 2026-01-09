@@ -3,7 +3,7 @@
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #pragma once
 
-#include "util/util.h"
+#include "common/util.h"
 
 #define AIFF_CKID FOURCC('F', 'O', 'R', 'M')
 #define AIFF_KIND FOURCC('A', 'I', 'F', 'F')

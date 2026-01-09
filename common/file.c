@@ -4,7 +4,7 @@
 #define _FILE_OFFSET_BITS 64
 #define _DEFAULT_SOURCE 1
 
-#include "util/util.h"
+#include "common/util.h"
 
 #include <errno.h>
 #include <fcntl.h>

@@ -3,7 +3,7 @@
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #pragma once
 
-#include "util/extended.h"
+#include "common/extended.h"
 
 #include <stdint.h>
 

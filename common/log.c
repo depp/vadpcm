@@ -6,7 +6,7 @@
 #error "Do not define _GNU_SOURCE"
 #endif
 
-#include "util/util.h"
+#include "common/util.h"
 
 #include <stdarg.h>
 #include <stdbool.h>

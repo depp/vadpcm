@@ -4,7 +4,7 @@
 #pragma once
 
 #include "codec/vadpcm.h"
-#include "util/extended.h"
+#include "common/extended.h"
 
 #include <stddef.h>
 #include <stdint.h>
