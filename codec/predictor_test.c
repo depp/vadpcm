@@ -151,7 +151,7 @@ static int vector_supremum(
     const struct vadpcm_vector vectors[static restrict 2]) {
     int norm = 0;
     for (int i = 0; i < 2; i++) {
-        for (int j = 0;  j < kVADPCMVectorSampleCount; j++) {
+        for (int j = 0; j < kVADPCMVectorSampleCount; j++) {
             int value = vectors[i].v[j];
             if (value < 0) {
                 value = -value;
@@ -164,7 +164,8 @@ static int vector_supremum(
     return norm;
 }
 
-static void print_vecs(struct vadpcm_vector vectors[static 2], const char *name) {
+static void print_vecs(struct vadpcm_vector vectors[static 2],
+                       const char *name) {
     for (int i = 0; i < 2; i++) {
         fprintf(stderr, "\t%s[%d] = [", name, i);
         for (int j = 0; j < kVADPCMVectorSampleCount; j++) {
@@ -192,7 +193,7 @@ void test_stability(void) {
         RES = 10,
         DIM = 2 * RES + 1,
     };
-    char dots[(DIM + 2) *DIM +1], *dotptr = dots;
+    char dots[(DIM + 2) * DIM + 1], *dotptr = dots;
     int failures = 0;
     double scale = 2.0 / (double)RES;
     for (int i = -RES; i <= RES; i++) {
@@ -223,8 +224,7 @@ void test_stability(void) {
                     int snorm = vector_supremum(svectors);
                     if (snorm > LIMIT) {
                         failures++;
-                        test_stability_fail(coeff,
-                                            "correction failed");
+                        test_stability_fail(coeff, "correction failed");
                         // print_vecs(vectors, "vec");
                         print_vecs(svectors, "out");
                     }
