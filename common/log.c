@@ -11,7 +11,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <string.h>
+#include <string.h> // IWYU pragma: keep (false positive?)
 
 enum {
     LEVEL_ERROR,

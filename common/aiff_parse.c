@@ -8,10 +8,8 @@
 #include "common/util.h"
 
 #include <inttypes.h>
-#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
 
 // This is a little clumsy.
 #if __clang__

@@ -7,7 +7,6 @@
 
 #include <errno.h>
 #include <getopt.h>
-#include <inttypes.h>
 #include <limits.h>
 #include <math.h>
 #include <pthread.h>
