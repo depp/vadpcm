@@ -5,6 +5,7 @@
 
 #include "codec/binary.h"
 #include "codec/vadpcm.h"
+#include "common/util.h"
 
 #include <errno.h>
 #include <stdbool.h>
@@ -18,18 +19,6 @@
 const char *vadpcm_error_name2(vadpcm_error err) {
     const char *msg = vadpcm_error_name(err);
     return msg == NULL ? "unknown error" : msg;
-}
-
-void *xmalloc(size_t nbytes) {
-    if (nbytes == 0) {
-        return NULL;
-    }
-    void *ptr = malloc(nbytes);
-    if (ptr == NULL) {
-        fputs("error: no memory\n", stderr);
-        exit(1);
-    }
-    return ptr;
 }
 
 // Contents of a file.
@@ -215,7 +204,7 @@ static void test_file(const char *name) {
         return;
     }
     size_t sample_count = aiff.audio_size / 2;
-    pcm = xmalloc(sizeof(*pcm) * sample_count);
+    pcm = XMALLOC(sample_count, sizeof(*pcm));
     for (size_t i = 0; i < sample_count; i++) {
         pcm[i] = vadpcm_read16((const char *)aiff.audio + 2 * i);
     }

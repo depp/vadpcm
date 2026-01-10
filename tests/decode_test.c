@@ -2,6 +2,7 @@
 // This file is part of VADPCM. VADPCM is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #include "codec/vadpcm.h"
+#include "common/util.h"
 #include "tests/test.h"
 
 #include <stdio.h>
@@ -11,7 +12,7 @@ void test_decode(const char *name, int predictor_count, int order,
                  struct vadpcm_vector *codebook, size_t frame_count,
                  const void *vadpcm, const int16_t *pcm) {
     size_t sample_count = frame_count * kVADPCMFrameSampleCount;
-    int16_t *out_pcm = xmalloc(sizeof(*out_pcm) * sample_count);
+    int16_t *out_pcm = XMALLOC(sample_count, sizeof(*out_pcm));
     struct vadpcm_vector state = {{0}};
     vadpcm_error err = vadpcm_decode(predictor_count, order, codebook, &state,
                                      frame_count, out_pcm, vadpcm);

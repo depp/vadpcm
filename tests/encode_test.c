@@ -2,6 +2,7 @@
 // This file is part of VADPCM. VADPCM is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #include "codec/encode.h"
+#include "common/util.h"
 #include "tests/test.h"
 
 #include <stdio.h>
@@ -35,7 +36,7 @@ void test_reencode(const char *name, int predictor_count, int order,
 
     struct vadpcm_vector state;
     memset(&state, 0, sizeof(state));
-    pcm1 = xmalloc(sizeof(*pcm1) * sample_count);
+    pcm1 = XMALLOC(sample_count, sizeof(*pcm1));
     err = vadpcm_decode(predictor_count, order, codebook, &state, frame_count,
                         pcm1, vadpcm);
     if (err != 0) {
@@ -44,15 +45,15 @@ void test_reencode(const char *name, int predictor_count, int order,
         test_failure_count++;
         goto done;
     }
-    predictors = xmalloc(frame_count);
+    predictors = XMALLOC(frame_count, 1);
     for (size_t frame = 0; frame < frame_count; frame++) {
         predictors[frame] =
             ((const uint8_t *)vadpcm)[kVADPCMFrameByteSize * frame] & 15;
     }
-    adpcm2 = xmalloc(kVADPCMFrameByteSize * frame_count);
+    adpcm2 = XMALLOC(frame_count, kVADPCMFrameByteSize);
     struct vadpcm_stats stats;
     vadpcm_encode_data(frame_count, adpcm2, pcm1, predictors, codebook, &stats);
-    pcm2 = xmalloc(kVADPCMFrameSampleCount * sizeof(int16_t) * frame_count);
+    pcm2 = XMALLOC(kVADPCMFrameSampleCount * frame_count, sizeof(int16_t));
     memset(&state, 0, sizeof(state));
     err = vadpcm_decode(predictor_count, order, codebook, &state, frame_count,
                         pcm2, adpcm2);

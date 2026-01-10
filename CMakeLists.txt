@@ -54,6 +54,8 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   include(CTest)
   if(BUILD_TESTING)
     add_executable(codec_test
+      common/alloc.c
+      common/log.c
       tests/decode_test.c
       tests/encode_test.c
       tests/predictor_test.c

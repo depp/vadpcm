@@ -8,15 +8,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-struct vadpcm_vector;
-
 extern int test_failure_count;
 
 // Return the name of the error, or "unknown error".
 const char *vadpcm_error_name2(vadpcm_error err);
-
-// Allocate memory, or abort on failure.
-void *xmalloc(size_t nbytes);
 
 // Print a frame of audio data, compared against a reference. The reference data
 // comes first.
