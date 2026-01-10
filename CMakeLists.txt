@@ -54,10 +54,10 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   include(CTest)
   if(BUILD_TESTING)
     add_executable(codec_test
-      codec/decode_test.c
-      codec/encode_test.c
-      codec/predictor_test.c
-      codec/test.c
+      tests/decode_test.c
+      tests/encode_test.c
+      tests/predictor_test.c
+      tests/test.c
     )
     target_link_libraries(codec_test vadpcm ${MATH_LIBRARY})
     add_test(

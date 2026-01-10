@@ -1,7 +1,7 @@
 // Copyright 2022 Dietrich Epp.
 // This file is part of VADPCM. VADPCM is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
-#include "codec/test.h"
+#include "tests/test.h"
 
 #include "codec/binary.h"
 #include "codec/vadpcm.h"
@@ -209,7 +209,7 @@ static void test_file(const char *name) {
     aiff.data.data = NULL;
 
     // Read PCM file.
-    snprintf(path, sizeof(path), "codec/data/%s.pcm.aiff", name);
+    snprintf(path, sizeof(path), "tests/data/%s.pcm.aiff", name);
     if (!read_aiff(&aiff, path)) {
         test_failure_count++;
         return;
@@ -223,7 +223,7 @@ static void test_file(const char *name) {
     aiff.data.data = NULL;
 
     // Read VADPCM file.
-    snprintf(path, sizeof(path), "codec/data/%s.adpcm.aifc", name);
+    snprintf(path, sizeof(path), "tests/data/%s.adpcm.aifc", name);
     if (!read_aiff(&aiff, path)) {
         test_failure_count++;
         goto done;

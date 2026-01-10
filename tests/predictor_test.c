@@ -5,8 +5,8 @@
 #include "codec/autocorr.h"
 #include "codec/encode.h"
 #include "codec/random.h"
-#include "codec/test.h"
 #include "codec/vadpcm.h"
+#include "tests/test.h"
 
 #include <math.h>
 #include <stdio.h>
