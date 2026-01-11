@@ -4,6 +4,7 @@
 #define _FILE_OFFSET_BITS 64
 #define _DEFAULT_SOURCE 1
 
+#include "common/defs.h"
 #include "common/util.h"
 
 #include <errno.h>
@@ -61,7 +62,7 @@ error:
 
 #define MAX_IOVEC 8
 
-int output_file_write(const char *filename, const struct bytestring *data,
+int output_file_write(const char *filename, const struct byteslice *data,
                       size_t count) {
     if (count > MAX_IOVEC) {
         LOG_ERROR("too many output file segments");

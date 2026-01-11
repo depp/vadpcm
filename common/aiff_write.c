@@ -6,6 +6,7 @@
 #include "codec/vadpcm.h"
 #include "common/aiff_internal.h"
 #include "common/binary.h"
+#include "common/defs.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -145,7 +146,7 @@ int aiff_write(const struct aiff_data *restrict aiff, const char *filename) {
 
     // Create file.
     uint8_t zero = 0;
-    struct bytestring chunks[3] = {
+    struct byteslice chunks[3] = {
         {.ptr = ptr, .size = head_size},
         {.ptr = aiff->audio_ptr, .size = aiff->audio_size},
         {.ptr = &zero, .size = chunk_size[kChunkSSND] & 1},

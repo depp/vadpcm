@@ -2,9 +2,10 @@
 // This file is part of VADPCM. VADPCM is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #pragma once
-
 #include <stddef.h>
 #include <stdint.h>
+
+struct byteslice;
 
 // ============================================================================
 // Logging
@@ -75,11 +76,6 @@ void input_file_destroy(struct input_file *file);
 // Read an entire file into memory. May use mmap.
 int input_file_read(struct input_file *file, const char *filename);
 
-struct bytestring {
-    const void *ptr;
-    size_t size;
-};
-
 // Write an output file, consisting of one or more parts.
-int output_file_write(const char *filename, const struct bytestring *data,
+int output_file_write(const char *filename, const struct byteslice *data,
                       size_t count);
