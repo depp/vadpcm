@@ -160,8 +160,10 @@ int aiff_parse(struct aiff_data *restrict aiff, const uint8_t *ptr,
                               ssnd_offset);
                     return -1;
                 }
-                aiff->audio_ptr = cptr + ssnd_offset + 8;
-                aiff->audio_size = chunk_size - 8 - ssnd_offset;
+                aiff->audio = (struct byteslice){
+                    .ptr = cptr + ssnd_offset + 8,
+                    .size = chunk_size - 8 - ssnd_offset,
+                };
             }
             break;
         case CHUNK_FVER:
@@ -219,9 +221,9 @@ int aiff_parse(struct aiff_data *restrict aiff, const uint8_t *ptr,
             LOG_ERROR("COMM specifies too much audio data");
             return -1;
         }
-        if (audio_bytes > aiff->audio_size) {
+        if (audio_bytes > aiff->audio.size) {
             LOG_ERROR("SSND data too small; size=%zu, minimum=%" PRIu32,
-                      aiff->audio_size, audio_bytes);
+                      aiff->audio.size, audio_bytes);
             return -1;
         }
     } break;
@@ -232,7 +234,7 @@ int aiff_parse(struct aiff_data *restrict aiff, const uint8_t *ptr,
     LOG_DEBUG("channels: %" PRIu32, aiff->num_channels);
     LOG_DEBUG("frames: %" PRIu32, aiff->num_sample_frames);
     LOG_DEBUG("bits: %" PRIu32, aiff->sample_size);
-    LOG_DEBUG("audio: ptr=%p; size=%zu", aiff->audio_ptr, aiff->audio_size);
+    LOG_DEBUG("audio: ptr=%p; size=%zu", aiff->audio.ptr, aiff->audio.size);
     (void)aiff;
     return 0;
 }

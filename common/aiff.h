@@ -2,8 +2,8 @@
 // This file is part of VADPCM. VADPCM is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #pragma once
-
 #include "codec/vadpcm.h"
+#include "common/defs.h"
 #include "common/extended.h"
 
 #include <stddef.h>
@@ -46,9 +46,8 @@ struct aiff_data {
     struct extended sample_rate;
     aiff_codec codec;
 
-    // SSND chunk.
-    const void *audio_ptr;
-    size_t audio_size;
+    // Sample data in SSND chunk.
+    struct byteslice audio;
 
     // VADPCM codebook.
     struct aiff_vadpcm_codebook vadpcm_codebook;

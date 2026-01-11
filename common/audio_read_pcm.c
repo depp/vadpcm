@@ -67,7 +67,7 @@ int audio_read_pcm(struct audio_data *restrict audio, const char *filename) {
     uint32_t original_sample_count = aiff.num_sample_frames;
     uint32_t padded_sample_count = pad_sample_count(original_sample_count);
     int16_t *sample_data = XMALLOC(padded_sample_count, sizeof(*sample_data));
-    copy_samples(sample_data, aiff.audio_ptr, aiff.num_sample_frames);
+    copy_samples(sample_data, aiff.audio.ptr, aiff.num_sample_frames);
     memset(sample_data + original_sample_count, 0,
            sizeof(int16_t) * (padded_sample_count - original_sample_count));
     *audio = (struct audio_data){

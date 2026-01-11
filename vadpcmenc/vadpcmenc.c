@@ -103,8 +103,11 @@ int main(int argc, char **argv) {
         .sample_size = 16,
         .sample_rate = audio.sample_rate,
         .codec = kAIFFCodecVADPCM,
-        .audio_ptr = vadpcm_data,
-        .audio_size = vadpcm_frame_count * kVADPCMFrameByteSize,
+        .audio =
+            {
+                .ptr = vadpcm_data,
+                .size = vadpcm_frame_count * kVADPCMFrameByteSize,
+            },
         .vadpcm_codebook =
             {
                 .order = kVADPCMEncodeOrder,

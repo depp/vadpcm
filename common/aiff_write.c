@@ -67,7 +67,7 @@ int aiff_write(const struct aiff_data *restrict aiff, const char *filename) {
         }
         break;
     }
-    chunk_size[kChunkSSND] = 8 + aiff->audio_size;
+    chunk_size[kChunkSSND] = 8 + aiff->audio.size;
 
     // Calculate location of each chunk.
     uint32_t file_size = 12;
@@ -148,7 +148,7 @@ int aiff_write(const struct aiff_data *restrict aiff, const char *filename) {
     uint8_t zero = 0;
     struct byteslice chunks[3] = {
         {.ptr = ptr, .size = head_size},
-        {.ptr = aiff->audio_ptr, .size = aiff->audio_size},
+        aiff->audio,
         {.ptr = &zero, .size = chunk_size[kChunkSSND] & 1},
     };
     int r = output_file_write(filename, chunks, 3);
