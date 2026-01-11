@@ -50,7 +50,7 @@ struct aiff_data {
     const void *audio_ptr;
     size_t audio_size;
 
-    // VADPCM codebook, if codec is VADPCM.
+    // VADPCM codebook.
     struct aiff_vadpcm_codebook vadpcm_codebook;
 };
 
