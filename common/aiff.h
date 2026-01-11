@@ -46,10 +46,12 @@ struct aiff_data {
     struct extended sample_rate;
     aiff_codec codec;
 
-    // Sample data in SSND chunk.
+    // Sample data in SSND chunk. Note: The size isn't validated against the
+    // COMM chunk and may be too small.
     struct byteslice audio;
 
-    // VADPCM codebook.
+    // VADPCM codebook. If not present, then the order and predictor count are
+    // both zero.
     struct aiff_vadpcm_codebook vadpcm_codebook;
 };
 

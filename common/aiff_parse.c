@@ -197,40 +197,6 @@ int aiff_parse(struct aiff_data *restrict aiff, const uint8_t *ptr,
         LOG_ERROR("no SSND chunk");
         return -1;
     }
-    if (aiff->sample_size == 0) {
-        LOG_ERROR("invalid sample size: 0");
-        return -1;
-    }
-    if (aiff->num_channels == 0) {
-        LOG_ERROR("invalid channel count: 0");
-        return -1;
-    }
-    if (aiff->num_sample_frames == 0) {
-        LOG_ERROR("invalid frame count: 0");
-        return -1;
-    }
-    switch (aiff->codec) {
-    case kAIFFCodecPCM: {
-        // 16-bit, so can't overflow (max 8192).
-        uint32_t sample_bytes = (aiff->sample_size + 7) >> 3;
-        // Also can't overflow: channel count is 16-bit.
-        uint32_t frame_bytes = aiff->num_channels * sample_bytes;
-        uint32_t audio_bytes;
-        if (__builtin_mul_overflow(frame_bytes, aiff->num_sample_frames,
-                                   &audio_bytes)) {
-            LOG_ERROR("COMM specifies too much audio data");
-            return -1;
-        }
-        if (audio_bytes > aiff->audio.size) {
-            LOG_ERROR("SSND data too small; size=%zu, minimum=%" PRIu32,
-                      aiff->audio.size, audio_bytes);
-            return -1;
-        }
-    } break;
-    case kAIFFCodecVADPCM:
-        LOG_ERROR("VADPCM unsupported for now");
-        return -1;
-    }
     LOG_DEBUG("channels: %" PRIu32, aiff->num_channels);
     LOG_DEBUG("frames: %" PRIu32, aiff->num_sample_frames);
     LOG_DEBUG("bits: %" PRIu32, aiff->sample_size);

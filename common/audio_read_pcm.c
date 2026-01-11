@@ -58,6 +58,10 @@ int audio_read_pcm(struct audio_data *restrict audio, const char *filename) {
                   aiff.sample_size);
         goto error;
     }
+    if (aiff.num_sample_frames == 0) {
+        LOG_ERROR("input file is empty (no audio data)");
+        goto error;
+    }
     if (aiff.num_sample_frames > MAX_INPUT_LENGTH) {
         LOG_ERROR("input file is too long; length=%" PRIu32
                   ", maximum=%" PRIu32,
@@ -65,6 +69,12 @@ int audio_read_pcm(struct audio_data *restrict audio, const char *filename) {
         goto error;
     }
     uint32_t original_sample_count = aiff.num_sample_frames;
+    uint32_t original_sample_size = original_sample_count * 2;
+    if (original_sample_size > aiff.audio.size) {
+        LOG_ERROR("sample data is too small; size=%zu, minimum=%" PRIu32,
+                  aiff.audio.size, original_sample_size);
+        goto error;
+    }
     uint32_t padded_sample_count = pad_sample_count(original_sample_count);
     int16_t *sample_data = XMALLOC(padded_sample_count, sizeof(*sample_data));
     copy_samples(sample_data, aiff.audio.ptr, aiff.num_sample_frames);
