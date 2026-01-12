@@ -28,7 +28,7 @@ typedef enum {
 } aiff_codec;
 
 // VADPCM codebook.
-struct aiff_vadpcm_codebook {
+struct aiff_codebook {
     int order;
     int predictor_count;
     struct vadpcm_vector *codebook;
@@ -52,7 +52,7 @@ struct aiff_data {
 
     // VADPCM codebook. If not present, then the order and predictor count are
     // both zero.
-    struct aiff_vadpcm_codebook vadpcm_codebook;
+    struct aiff_codebook codebook;
 };
 
 // Parse an AIFF or AIFF-C file. Returns 0 on success.

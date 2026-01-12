@@ -60,8 +60,7 @@ int aiff_write(const struct aiff_data *restrict aiff, const char *filename) {
         if (aiff->codec == kAIFFCodecVADPCM) {
             chunk_size[kChunkVCodebook] =
                 16 + 6 +
-                16 * aiff->vadpcm_codebook.order *
-                    aiff->vadpcm_codebook.predictor_count;
+                16 * aiff->codebook.order * aiff->codebook.predictor_count;
         }
         break;
     }
@@ -125,8 +124,7 @@ int aiff_write(const struct aiff_data *restrict aiff, const char *filename) {
             write32be(cptr, APPL_STOC);
             memcpy(cptr + 4, kAPPLCodebook, 12);
             cptr += 16;
-            const struct aiff_vadpcm_codebook *restrict codebook =
-                &aiff->vadpcm_codebook;
+            const struct aiff_codebook *restrict codebook = &aiff->codebook;
             write16be(cptr, 1); // version
             write16be(cptr + 2, codebook->order);
             write16be(cptr + 4, codebook->predictor_count);

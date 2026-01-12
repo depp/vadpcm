@@ -111,7 +111,7 @@ int vadpcmenc(int argc, char **argv) {
                 .ptr = vadpcm_data,
                 .size = vadpcm_frame_count * kVADPCMFrameByteSize,
             },
-        .vadpcm_codebook =
+        .codebook =
             {
                 .order = kVADPCMEncodeOrder,
                 .predictor_count = predictor_count,
