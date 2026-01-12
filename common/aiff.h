@@ -27,7 +27,7 @@ typedef enum {
     kAIFFCodecVADPCM,
 } aiff_codec;
 
-// VADPCM codebook .
+// VADPCM codebook.
 struct aiff_vadpcm_codebook {
     int order;
     int predictor_count;
