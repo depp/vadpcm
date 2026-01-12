@@ -10,12 +10,6 @@
 #include <inttypes.h>
 #include <string.h>
 
-// Maximum number of samples in an input file. This limit is somewhat
-// arbitrary for now. It means that we don't overflow a 32-bit number when
-// calculating sizes with 16-bit samples, and it's a power of two so we wont
-// go over it because of padding.
-#define MAX_INPUT_LENGTH ((uint32_t)0x40000000)
-
 // Copy 16-bit big-endian samples into the destination.
 static void copy_samples(int16_t *dest, const uint8_t *src, size_t n) {
     for (size_t i = 0; i < n; i++) {
@@ -23,7 +17,7 @@ static void copy_samples(int16_t *dest, const uint8_t *src, size_t n) {
     }
 }
 
-int audio_read_pcm(struct audio_data *restrict audio, const char *filename) {
+int audio_read_pcm(struct audio_pcm *restrict audio, const char *filename) {
     struct input_file input;
     int r = input_file_read(&input, filename);
     if (r != 0) {
@@ -75,11 +69,14 @@ int audio_read_pcm(struct audio_data *restrict audio, const char *filename) {
     copy_samples(sample_data, aiff.audio.ptr, aiff.num_sample_frames);
     memset(sample_data + original_sample_count, 0,
            sizeof(int16_t) * (padded_sample_count - original_sample_count));
-    *audio = (struct audio_data){
-        .original_sample_count = original_sample_count,
-        .padded_sample_count = padded_sample_count,
+    *audio = (struct audio_pcm){
+        .meta =
+            {
+                .original_sample_count = original_sample_count,
+                .padded_sample_count = padded_sample_count,
+                .sample_rate = aiff.sample_rate,
+            },
         .sample_data = sample_data,
-        .sample_rate = aiff.sample_rate,
     };
     input_file_destroy(&input);
     return 0;

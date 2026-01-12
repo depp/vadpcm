@@ -72,14 +72,14 @@ int cmd_encode(int argc, char **argv) {
     LOG_DEBUG("input: %s", input_file);
     LOG_DEBUG("output: %s", output_file);
     LOG_DEBUG("predictor count: %d", predictor_count);
-    struct audio_data audio;
+    struct audio_pcm audio;
     int r = audio_read_pcm(&audio, input_file);
     if (r != 0) {
         return 1;
     }
-    LOG_INFO("sample rate: %f", double_from_extended(&audio.sample_rate));
+    LOG_INFO("sample rate: %f", double_from_extended(&audio.meta.sample_rate));
     uint32_t vadpcm_frame_count =
-        audio.padded_sample_count / kVADPCMFrameSampleCount;
+        audio.meta.padded_sample_count / kVADPCMFrameSampleCount;
     void *vadpcm_data = XMALLOC(vadpcm_frame_count, kVADPCMFrameByteSize);
     struct vadpcm_params params = {
         .predictor_count = predictor_count,
@@ -102,9 +102,10 @@ int cmd_encode(int argc, char **argv) {
         .version = kAIFFC,
         .version_timestamp = kAIFCVersion1,
         .num_channels = 1,
-        .num_sample_frames = audio.padded_sample_count,
+        // FIXME: use unpadded value?
+        .num_sample_frames = audio.meta.padded_sample_count,
         .sample_size = 16,
-        .sample_rate = audio.sample_rate,
+        .sample_rate = audio.meta.sample_rate,
         .codec = kAIFFCodecVADPCM,
         .audio =
             {

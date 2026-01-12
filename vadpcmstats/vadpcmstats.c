@@ -49,13 +49,13 @@ static const char HELP[] =
 
 static void collect_stats(struct vadpcm_params *params, const char *input_file,
                           struct vadpcm_stats *stats) {
-    struct audio_data audio;
+    struct audio_pcm audio;
     int r = audio_read_pcm(&audio, input_file);
     if (r != 0) {
         goto error;
     }
     uint32_t vadpcm_frame_count =
-        audio.padded_sample_count / kVADPCMFrameSampleCount;
+        audio.meta.padded_sample_count / kVADPCMFrameSampleCount;
     void *vadpcm_data = XMALLOC(vadpcm_frame_count, kVADPCMFrameByteSize);
     struct vadpcm_vector codebook[kVADPCMMaxPredictorCount];
     vadpcm_error err = vadpcm_encode(params, codebook, vadpcm_frame_count,
