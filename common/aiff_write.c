@@ -124,12 +124,12 @@ int aiff_write(const struct aiff_data *restrict aiff, const char *filename) {
             write32be(cptr, APPL_STOC);
             memcpy(cptr + 4, kAPPLCodebook, 12);
             cptr += 16;
-            const struct aiff_codebook *restrict codebook = &aiff->codebook;
+            const struct vadpcm_codebook *restrict codebook = &aiff->codebook;
             write16be(cptr, 1); // version
             write16be(cptr + 2, codebook->order);
             write16be(cptr + 4, codebook->predictor_count);
             cptr += 6;
-            const struct vadpcm_vector *restrict vector = codebook->codebook;
+            const struct vadpcm_vector *restrict vector = codebook->vector;
             for (int i = 0, n = codebook->order * codebook->predictor_count;
                  i < n; i++) {
                 for (int j = 0; j < 8; j++) {

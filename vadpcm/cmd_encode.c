@@ -116,7 +116,7 @@ int cmd_encode(int argc, char **argv) {
             {
                 .order = kVADPCMEncodeOrder,
                 .predictor_count = predictor_count,
-                .codebook = codebook,
+                .vector = codebook,
             },
     };
     r = aiff_write(&aiff, output_file);

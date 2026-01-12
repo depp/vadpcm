@@ -9,3 +9,11 @@ struct byteslice {
     const void *ptr;
     size_t size;
 };
+
+// VADPCM codebook.
+struct vadpcm_codebook {
+    int order;
+    int predictor_count;
+    // There are order * predictor_count vectors.
+    struct vadpcm_vector *vector;
+};

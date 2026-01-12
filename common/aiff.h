@@ -2,7 +2,6 @@
 // This file is part of VADPCM. VADPCM is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #pragma once
-#include "codec/vadpcm.h"
 #include "common/defs.h"
 #include "common/extended.h"
 
@@ -27,13 +26,6 @@ typedef enum {
     kAIFFCodecVADPCM,
 } aiff_codec;
 
-// VADPCM codebook.
-struct aiff_codebook {
-    int order;
-    int predictor_count;
-    struct vadpcm_vector *codebook;
-};
-
 // A parsed AIFF or AIFF-C file.
 struct aiff_data {
     aiff_version version;
@@ -52,7 +44,7 @@ struct aiff_data {
 
     // VADPCM codebook. If not present, then the order and predictor count are
     // both zero.
-    struct aiff_codebook codebook;
+    struct vadpcm_codebook codebook;
 };
 
 // Parse an AIFF or AIFF-C file. Returns 0 on success.
