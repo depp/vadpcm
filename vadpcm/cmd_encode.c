@@ -5,6 +5,7 @@
 #include "common/aiff.h"
 #include "common/audio.h"
 #include "common/util.h"
+#include "vadpcm/commands.h"
 
 #include <getopt.h>
 #include <math.h>
@@ -15,17 +16,18 @@ enum {
     kDefaultPredictorCount = 4,
 };
 
+// clang-format off: let this be wide
 static const char HELP[] =
-    "Usage: vadpcmenc [options] input_file output_file\n"
+    "Usage: vadpcm encode [options...] input_file output_file\n"
     "\n"
     "Encode an audio file using VADPCM.\n"
     "\n"
     "Options:\n"
-    "  -h, --help          Show this help\n"
-    "  -p, --predictors n  Set the number of predictors to use (1..16, default "
-    "4)\n";
+    "  -h, --help          Show this help text\n"
+    "  -p, --predictors n  Set the number of predictors to use (1..16, default 4)\n";
+// clang-format on
 
-int main(int argc, char **argv) {
+int vadpcmenc(int argc, char **argv) {
     static const struct option long_options[] = {
         {"help", no_argument, 0, 'h'},
         {"predictors", required_argument, 0, 'p'},
@@ -33,6 +35,7 @@ int main(int argc, char **argv) {
     };
     int opt, option_index;
     int predictor_count = kDefaultPredictorCount;
+    optind = 2;
     while ((opt = getopt_long(argc, argv, "hp:", long_options,
                               &option_index)) != -1) {
         switch (opt) {
