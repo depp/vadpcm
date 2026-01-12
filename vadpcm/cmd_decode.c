@@ -19,7 +19,9 @@ static const char HELP[] =
     "Decode a VADPCM-encoded audio file.\n"
     "\n"
     "Options:\n"
-    "  -h, --help          Show this help text\n";
+    "  --debug             Print debug messages\n"
+    "  -h, --help          Show this help text\n"
+    "  -q, --quiet         Only print warnings and errors\n";
 // clang-format on
 
 static void swap16_inplace(int16_t *ptr, size_t size);
@@ -40,8 +42,13 @@ static void swap16_inplace(int16_t *ptr, size_t size) {
 
 int cmd_decode(int argc, char **argv) {
     // Parse command-line.
+    enum {
+        opt_debug = 1,
+    };
     static const struct option long_options[] = {
+        {"debug", no_argument, 0, opt_debug},
         {"help", no_argument, 0, 'h'},
+        {"quiet", no_argument, 0, 'q'},
         {0, 0, 0, 0},
     };
     int opt, option_index;
@@ -49,9 +56,15 @@ int cmd_decode(int argc, char **argv) {
     while ((opt = getopt_long(argc, argv, "h", long_options, &option_index)) !=
            -1) {
         switch (opt) {
+        case opt_debug:
+            g_log_level = LEVEL_DEBUG;
+            break;
         case 'h':
             fputs(HELP, stdout);
             return 0;
+        case 'q':
+            g_log_level = LEVEL_QUIET;
+            break;
         default:
             return 2;
         }
@@ -106,7 +119,6 @@ int cmd_decode(int argc, char **argv) {
         return 1;
     }
 
-    LOG_INFO("ok");
     free(pcm_data);
     return 0;
 }

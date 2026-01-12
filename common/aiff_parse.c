@@ -277,11 +277,13 @@ int aiff_parse(struct aiff_data *restrict aiff, const uint8_t *ptr,
                 }
             }
         } break;
-        default: {
-            char buf[FOURCC_BUFSZ];
-            format_fourcc(buf, chunk_id);
-            LOG_INFO("unknown chunk: %s", buf);
-        } break;
+        default:
+            if (g_log_level >= LEVEL_DEBUG) {
+                char buf[FOURCC_BUFSZ];
+                format_fourcc(buf, chunk_id);
+                LOG_DEBUG("unknown chunk: %s", buf);
+            }
+            break;
         }
         offset += chunk_size_padded;
     }

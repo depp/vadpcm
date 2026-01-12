@@ -23,22 +23,32 @@ static const char HELP[] =
     "Encode an audio file using VADPCM.\n"
     "\n"
     "Options:\n"
+    "  --debug             Print debug messages\n"
     "  -h, --help          Show this help text\n"
-    "  -p, --predictors n  Set the number of predictors to use (1..16, default 4)\n";
+    "  -p, --predictors n  Set the number of predictors to use (1..16, default 4)\n"
+    "  -q, --quiet         Only print warnings and errors\n";
 // clang-format on
 
 int cmd_encode(int argc, char **argv) {
+    enum {
+        opt_debug = 1,
+    };
     static const struct option long_options[] = {
+        {"debug", no_argument, 0, opt_debug},
         {"help", no_argument, 0, 'h'},
         {"predictors", required_argument, 0, 'p'},
+        {"quiet", no_argument, 0, 'q'},
         {0, 0, 0, 0},
     };
     int opt, option_index;
     int predictor_count = kDefaultPredictorCount;
     optind = 2;
-    while ((opt = getopt_long(argc, argv, "hp:", long_options,
+    while ((opt = getopt_long(argc, argv, "hp:q", long_options,
                               &option_index)) != -1) {
         switch (opt) {
+        case opt_debug:
+            g_log_level = LEVEL_DEBUG;
+            break;
         case 'h':
             fputs(HELP, stdout);
             return 0;
@@ -55,6 +65,9 @@ int cmd_encode(int argc, char **argv) {
             }
             predictor_count = value;
         } break;
+        case 'q':
+            g_log_level = LEVEL_QUIET;
+            break;
         default:
             return 2;
         }
@@ -69,15 +82,20 @@ int cmd_encode(int argc, char **argv) {
     }
     const char *input_file = argv[optind];
     const char *output_file = argv[optind + 1];
-    LOG_DEBUG("input: %s", input_file);
-    LOG_DEBUG("output: %s", output_file);
-    LOG_DEBUG("predictor count: %d", predictor_count);
+    if (g_log_level >= LEVEL_DEBUG) {
+        LOG_DEBUG("input: %s", input_file);
+        LOG_DEBUG("output: %s", output_file);
+        LOG_DEBUG("predictor count: %d", predictor_count);
+    }
     struct audio_pcm audio;
     int r = audio_read_pcm(&audio, input_file);
     if (r != 0) {
         return 1;
     }
-    LOG_INFO("sample rate: %f", double_from_extended(&audio.meta.sample_rate));
+    if (g_log_level >= LEVEL_DEBUG) {
+        LOG_INFO("sample rate: %f",
+                 double_from_extended(&audio.meta.sample_rate));
+    }
     uint32_t vadpcm_frame_count =
         audio.meta.padded_sample_count / kVADPCMFrameSampleCount;
     void *vadpcm_data = XMALLOC(vadpcm_frame_count, kVADPCMFrameByteSize);
@@ -124,7 +142,6 @@ int cmd_encode(int argc, char **argv) {
         return 1;
     }
 
-    LOG_INFO("ok");
     free(audio.sample_data);
     free(vadpcm_data);
     return 0;

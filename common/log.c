@@ -13,11 +13,7 @@
 #include <stdio.h>
 #include <string.h> // IWYU pragma: keep (false positive?)
 
-enum {
-    LEVEL_ERROR,
-    LEVEL_INFO,
-    LEVEL_DEBUG,
-};
+log_level g_log_level = LEVEL_INFO;
 
 struct log_level {
     char color[5];
@@ -30,8 +26,12 @@ static const struct log_level LEVELS[] = {
     [LEVEL_DEBUG] = {.color = "35", .name = "Debug"},
 };
 
-static void log_msg(int level, const char *file, int line, bool has_errcode,
-                    int errcode, const char *fmt, va_list ap) {
+static void log_msg(log_level level, const char *file, int line,
+                    bool has_errcode, int errcode, const char *fmt,
+                    va_list ap) {
+    if (level > g_log_level) {
+        return;
+    }
     flockfile(stderr);
     fprintf(stderr, "\33[%sm%s\33[0m: %s:%d: ", LEVELS[level].color,
             LEVELS[level].name, file, line);

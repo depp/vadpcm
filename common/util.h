@@ -11,6 +11,16 @@ struct byteslice;
 // Logging
 // ============================================================================
 
+typedef enum {
+    LEVEL_ERROR,
+    LEVEL_INFO,
+    LEVEL_DEBUG,
+} log_level;
+
+#define LEVEL_QUIET LEVEL_ERROR
+
+extern log_level g_log_level;
+
 // Show an error message.
 void log_error(const char *file, int line, const char *fmt, ...)
     __attribute__((format(printf, 3, 4)));
