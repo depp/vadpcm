@@ -80,13 +80,17 @@ int cmd_decode(int argc, char **argv) {
     const char *input_file = argv[optind];
     const char *output_file = argv[optind + 1];
 
-    // Main command.
+    // Read input.
+    log_context("read %s", input_file);
     struct audio_vadpcm audio;
     int r = audio_read_vadpcm(&audio, input_file);
     if (r != 0) {
         return -1;
     }
     LOG_INFO("sample rate: %f", double_from_extended(&audio.meta.sample_rate));
+
+    // Decode.
+    log_context("decode %s", input_file);
     int16_t *pcm_data =
         XMALLOC(audio.meta.padded_sample_count, sizeof(*pcm_data));
     struct vadpcm_vector state;
@@ -100,6 +104,9 @@ int cmd_decode(int argc, char **argv) {
         LOG_ERROR("decoding failed: %s", vadpcm_error_name(err));
         return 1;
     }
+
+    // Write output.
+    log_context("write %s", output_file);
     swap16_inplace(pcm_data, audio.meta.padded_sample_count);
     struct aiff_data aiff = {
         .version = kAIFF,
@@ -120,5 +127,6 @@ int cmd_decode(int argc, char **argv) {
     }
 
     free(pcm_data);
+    log_context_clear();
     return 0;
 }

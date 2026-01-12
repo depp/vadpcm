@@ -29,24 +29,24 @@ void input_file_destroy(struct input_file *file) {
 int input_file_read(struct input_file *file, const char *filename) {
     int fd = open(filename, O_RDONLY);
     if (fd == -1) {
-        LOG_ERROR_ERRNO(errno, "open %s", filename);
+        LOG_ERROR_ERRNO(errno, "could not open");
         return -1;
     }
     struct stat st;
     int r;
     r = fstat(fd, &st);
     if (r == -1) {
-        LOG_ERROR_ERRNO(errno, "stat %s", filename);
+        LOG_ERROR_ERRNO(errno, "could not stat");
         goto error;
     }
     off_t size = st.st_size;
     if (size > (size_t)-1) {
-        LOG_ERROR("read %s: file too large", filename);
+        LOG_ERROR("file too large for mmap");
         goto error;
     }
     void *ptr = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
     if (ptr == MAP_FAILED) {
-        LOG_ERROR_ERRNO(errno, "mmap %s", filename);
+        LOG_ERROR_ERRNO(errno, "could not mmap");
         goto error;
     }
     *file = (struct input_file){
@@ -113,6 +113,6 @@ int output_file_write(const char *filename, const struct byteslice *data,
     return 0;
 
 error:
-    LOG_ERROR_ERRNO(errcode, "write %s", filename);
+    LOG_ERROR_ERRNO(errcode, "could not write");
     return -1;
 }

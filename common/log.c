@@ -5,15 +5,19 @@
 #ifdef _GNU_SOURCE
 #error "Do not define _GNU_SOURCE"
 #endif
+#define _DARWIN_C_SOURCE 1
 
 #include "common/util.h"
 
+#include <errno.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <string.h> // IWYU pragma: keep (false positive?)
+#include <stdlib.h>
+#include <string.h>
 
 log_level g_log_level = LEVEL_INFO;
+static char *g_log_context;
 
 struct log_level {
     char color[5];
@@ -37,6 +41,11 @@ static void log_msg(log_level level, const char *file, int line,
             LEVELS[level].name);
     if (g_log_level >= LEVEL_DEBUG) {
         fprintf(stderr, "%s:%d: ", file, line);
+    }
+    char *ctx = g_log_context;
+    if (ctx != NULL) {
+        fputs(ctx, stderr);
+        fputs(": ", stderr);
     }
     vfprintf(stderr, fmt, ap);
     if (has_errcode) {
@@ -80,6 +89,30 @@ void log_debug(const char *file, int line, const char *fmt, ...) {
     va_start(ap, fmt);
     log_msg(LEVEL_DEBUG, file, line, false, 0, fmt, ap);
     va_end(ap);
+}
+
+static void log_context_set(char *value) {
+    if (g_log_context != NULL) {
+        free(g_log_context);
+    }
+    g_log_context = value;
+}
+
+void log_context(const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    char *ptr;
+    int r = vasprintf(&ptr, fmt, ap);
+    if (r == -1) {
+        LOG_ERROR_ERRNO(errno, "vasprintf");
+        abort();
+    }
+    va_end(ap);
+    log_context_set(ptr);
+}
+
+void log_context_clear(void) {
+    log_context_set(NULL);
 }
 
 static char hexdigit(int x) {

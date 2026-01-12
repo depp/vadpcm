@@ -87,6 +87,9 @@ int cmd_encode(int argc, char **argv) {
         LOG_DEBUG("output: %s", output_file);
         LOG_DEBUG("predictor count: %d", predictor_count);
     }
+
+    // Read input.
+    log_context("read %s", input_file);
     struct audio_pcm audio;
     int r = audio_read_pcm(&audio, input_file);
     if (r != 0) {
@@ -96,6 +99,9 @@ int cmd_encode(int argc, char **argv) {
         LOG_INFO("sample rate: %f",
                  double_from_extended(&audio.meta.sample_rate));
     }
+
+    // Encode.
+    log_context("encode %s", input_file);
     uint32_t vadpcm_frame_count =
         audio.meta.padded_sample_count / kVADPCMFrameSampleCount;
     void *vadpcm_data = XMALLOC(vadpcm_frame_count, kVADPCMFrameByteSize);
@@ -116,6 +122,7 @@ int cmd_encode(int argc, char **argv) {
     LOG_INFO("error level: %.2f dB", error_level);
     LOG_INFO("SNR: %.2f dB", signal_level - error_level);
 
+    log_context("write %s", output_file);
     struct aiff_data aiff = {
         .version = kAIFFC,
         .version_timestamp = kAIFCVersion1,
@@ -144,5 +151,6 @@ int cmd_encode(int argc, char **argv) {
 
     free(audio.sample_data);
     free(vadpcm_data);
+    log_context_clear();
     return 0;
 }

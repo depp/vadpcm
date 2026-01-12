@@ -22,9 +22,8 @@ int audio_read_vadpcm(struct audio_vadpcm *restrict audio,
     if (r != 0) {
         goto error;
     }
-    LOG_DEBUG("read input file");
     if (aiff.codec != kAIFFCodecVADPCM) {
-        LOG_ERROR("input file is not VADPCM");
+        LOG_ERROR("file does not contain VADPCM data");
         goto error;
     }
     if (aiff.num_channels != 1) {
@@ -38,7 +37,7 @@ int audio_read_vadpcm(struct audio_vadpcm *restrict audio,
         goto error;
     }
     if (aiff.num_sample_frames > MAX_INPUT_LENGTH) {
-        LOG_ERROR("input file is too long; length=%" PRIu32
+        LOG_ERROR("audio file is too long; length=%" PRIu32
                   ", maximum=%" PRIu32,
                   aiff.num_sample_frames, MAX_INPUT_LENGTH);
         goto error;

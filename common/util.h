@@ -43,6 +43,13 @@ void log_debug(const char *file, int line, const char *fmt, ...)
 #define LOG_INFO(...) log_info(__FILE__, __LINE__, __VA_ARGS__)
 #define LOG_DEBUG(...) log_debug(__FILE__, __LINE__, __VA_ARGS__)
 
+// Set additional context for logging. This will be printed before each log
+// message. This is tracked with a thread-local variable.
+void log_context(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+
+// Clear additional context for logging.
+void log_context_clear(void);
+
 // ============================================================================
 // Memory Allocation
 // ============================================================================
