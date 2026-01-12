@@ -23,12 +23,6 @@ static void copy_samples(int16_t *dest, const uint8_t *src, size_t n) {
     }
 }
 
-// Pad the sample count to a multiple of the VADPCM frame size.
-static uint32_t pad_sample_count(uint32_t count) {
-    return (count + (kVADPCMFrameSampleCount - 1)) &
-           ~((uint32_t)kVADPCMFrameSampleCount - 1);
-}
-
 int audio_read_pcm(struct audio_data *restrict audio, const char *filename) {
     struct input_file input;
     int r = input_file_read(&input, filename);
@@ -75,7 +69,8 @@ int audio_read_pcm(struct audio_data *restrict audio, const char *filename) {
                   aiff.audio.size, original_sample_size);
         goto error;
     }
-    uint32_t padded_sample_count = pad_sample_count(original_sample_count);
+    uint32_t padded_sample_count =
+        align32(original_sample_count, kVADPCMFrameSampleCount);
     int16_t *sample_data = XMALLOC(padded_sample_count, sizeof(*sample_data));
     copy_samples(sample_data, aiff.audio.ptr, aiff.num_sample_frames);
     memset(sample_data + original_sample_count, 0,
