@@ -34,8 +34,6 @@ include_directories(.)
 
 add_library(vadpcm STATIC
   codec/autocorr.c
-  codec/binary.c
-  codec/codebook.c
   codec/decode.c
   codec/encode.c
   codec/error.c

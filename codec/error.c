@@ -9,12 +9,6 @@ const char *vadpcm_error_name(vadpcm_error err) {
         return "no error";
     case kVADPCMErrInvalidData:
         return "invalid data";
-    case kVADPCMErrLargeOrder:
-        return "predictor order too large";
-    case kVADPCMErrLargePredictorCount:
-        return "predictor count too large";
-    case kVADPCMErrUnknownVersion:
-        return "unknown VADPCM version";
     case kVADPCMErrInvalidParams:
         return "invalid encoding parameters";
     case kVADPCMErrMemory:

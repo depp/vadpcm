@@ -23,15 +23,6 @@ typedef enum {
     // Invalid data.
     kVADPCMErrInvalidData,
 
-    // Predictor order is too large.
-    kVADPCMErrLargeOrder,
-
-    // Predictor count is too large.
-    kVADPCMErrLargePredictorCount,
-
-    // Data uses an unsupported / unknown version of VADPCM.
-    kVADPCMErrUnknownVersion,
-
     // Invalid encoding parameters.
     kVADPCMErrInvalidParams,
 
@@ -87,29 +78,6 @@ struct vadpcm_codebook_spec {
     // been observed here.
     int order;
 };
-
-// Parse a codebook spec, as it appears in an AIFC file. On success, fills in
-// 'spec' and stores the offset to the vector data in data_offset.
-//
-// The data is taken from an AIFC 'APPL' (application-specific) chunk with the
-// name "VADPCMCODES". The chunk header, APPL header, and chunk name should not
-// be included in the data passed to this function.
-//
-// Error codes:
-//   kVADPCMErrInvalidData: Order or predictor count is zero, or the data is
-//                          incomplete (unexpected EOF).
-//   kVADPCMErrLargeOrder: Order is larger than largest supported order.
-//   kVADPCMErrLargePredictorCount: Predictor count is larger than the largest
-//                                  supported predictor count.
-//   kVADPCMErrUnknownVersion: Data uses an unknown version of VADPCM.
-vadpcm_error vadpcm_read_codebook_aifc(
-    struct vadpcm_codebook_spec *VADPCM_RESTRICT spec,
-    size_t *VADPCM_RESTRICT data_offset, const void *VADPCM_RESTRICT data,
-    size_t size);
-
-// Parse codebook vectors.
-void vadpcm_read_vectors(int count, const void *VADPCM_RESTRICT data,
-                         struct vadpcm_vector *VADPCM_RESTRICT vectors);
 
 // Decode VADPCM-encoded audio.
 //
