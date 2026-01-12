@@ -98,6 +98,7 @@ int main(int argc, char **argv) {
     test_autocorr();
     test_solve();
     test_stability();
+    test_extensions();
     for (int i = 0; kAIFFNames[i] != NULL; i++) {
         test_file(kAIFFNames[i]);
     }

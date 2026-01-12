@@ -35,3 +35,6 @@ void test_solve(void);
 
 // Coefficient stability test.
 void test_stability(void);
+
+// Test filename extension extraction.
+void test_extensions(void);
