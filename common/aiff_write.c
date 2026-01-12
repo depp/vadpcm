@@ -38,8 +38,6 @@ static const struct aiff_codec kAIFFCodecs[] = {
     [kAIFFCodecVADPCM] = {CODEC_VADPCM, "\13VADPCM ~4-1"},
 };
 
-static const char kVADPCMCodebookID[] = "stoc\13VADPCMCODES";
-
 int aiff_write(const struct aiff_data *restrict aiff, const char *filename) {
     // Calculate size of each chunk.
     // 0 = not present.
@@ -124,7 +122,8 @@ int aiff_write(const struct aiff_data *restrict aiff, const char *filename) {
         // VADPCM codebook.
         if (aiff->codec == kAIFFCodecVADPCM) {
             cptr = ptr + chunk_offset[kChunkVCodebook];
-            memcpy(cptr, kVADPCMCodebookID, 16);
+            write32be(cptr, APPL_STOC);
+            memcpy(cptr + 4, kAPPLCodebook, 12);
             cptr += 16;
             const struct aiff_vadpcm_codebook *restrict codebook =
                 &aiff->vadpcm_codebook;

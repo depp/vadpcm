@@ -80,6 +80,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 endif()
 
 add_executable(vadpcm_cli
+  common/aiff_common.c
   common/aiff_parse.c
   common/aiff_write.c
   common/alloc.c
@@ -96,6 +97,7 @@ set_target_properties(vadpcm_cli PROPERTIES OUTPUT_NAME vadpcm)
 target_link_libraries(vadpcm_cli vadpcm ${MATH_LIBRARY})
 
 add_executable(vadpcmstats
+  common/aiff_common.c
   common/aiff_parse.c
   common/alloc.c
   common/audio_read_pcm.c

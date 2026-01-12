@@ -18,3 +18,9 @@
 
 #define CODEC_PCM FOURCC('N', 'O', 'N', 'E')
 #define CODEC_VADPCM FOURCC('V', 'A', 'P', 'C')
+
+// Standard code in APPL chunk to indicate that the chunk has a long name.
+#define APPL_STOC FOURCC('s', 't', 'o', 'c')
+
+// APPL name for VADPCM codebook.
+extern const uint8_t kAPPLCodebook[12];
