@@ -48,20 +48,32 @@ if(MATH_LIBRARY)
   target_link_libraries(vadpcm PUBLIC ${MATH_LIBRARY})
 endif()
 
+add_library(common STATIC
+  common/aiff_common.c
+  common/aiff_parse.c
+  common/aiff_write.c
+  common/alloc.c
+  common/audio_read_pcm.c
+  common/audio_read_vadpcm.c
+  common/binary.c
+  common/extended.c
+  common/file.c
+  common/log.c
+  common/util.c
+)
+
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 
   # Build and run tests.
   include(CTest)
   if(BUILD_TESTING)
     add_executable(codec_test
-      common/alloc.c
-      common/log.c
       tests/decode_test.c
       tests/encode_test.c
       tests/predictor_test.c
       tests/test.c
     )
-    target_link_libraries(codec_test vadpcm ${MATH_LIBRARY})
+    target_link_libraries(codec_test common vadpcm ${MATH_LIBRARY})
     add_test(
       NAME codec_test
       COMMAND $<TARGET_FILE:codec_test>
@@ -80,33 +92,14 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 endif()
 
 add_executable(vadpcm_cli
-  common/aiff_common.c
-  common/aiff_parse.c
-  common/aiff_write.c
-  common/alloc.c
-  common/audio_read_pcm.c
-  common/audio_read_vadpcm.c
-  common/binary.c
-  common/extended.c
-  common/file.c
-  common/log.c
-  common/util.c
   vadpcm/cmd_decode.c
   vadpcm/cmd_encode.c
   vadpcm/vadpcm.c
 )
 set_target_properties(vadpcm_cli PROPERTIES OUTPUT_NAME vadpcm)
-target_link_libraries(vadpcm_cli vadpcm ${MATH_LIBRARY})
+target_link_libraries(vadpcm_cli common vadpcm ${MATH_LIBRARY})
 
 add_executable(vadpcmstats
-  common/aiff_common.c
-  common/aiff_parse.c
-  common/alloc.c
-  common/audio_read_pcm.c
-  common/binary.c
-  common/file.c
-  common/log.c
-  common/util.c
   vadpcmstats/vadpcmstats.c
 )
-target_link_libraries(vadpcmstats vadpcm ${MATH_LIBRARY})
+target_link_libraries(vadpcmstats common vadpcm ${MATH_LIBRARY})
