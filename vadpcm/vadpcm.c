@@ -24,6 +24,7 @@ static const char HELP[] =
     "  -v, --version  Show the version of this software\n"
     "\n"
     "Commands:\n"
+    "  decode  Decode a VADPCM-encoded audio file.\n"
     "  encode  Encode an audio file using VADPCM.\n"
     "  help    Show help information.\n";
 // clang-format on
@@ -67,6 +68,9 @@ int main(int argc, char **argv) {
     }
     if (strcmp(arg, "encode") == 0) {
         return cmd_encode(argc, argv);
+    }
+    if (strcmp(arg, "decode") == 0) {
+        return cmd_decode(argc, argv);
     }
     if (strcmp(arg, "help") == 0) {
         cmd_help();

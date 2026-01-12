@@ -85,11 +85,13 @@ add_executable(vadpcm_cli
   common/aiff_write.c
   common/alloc.c
   common/audio_read_pcm.c
+  common/audio_read_vadpcm.c
   common/binary.c
   common/extended.c
   common/file.c
   common/log.c
   common/util.c
+  vadpcm/cmd_decode.c
   vadpcm/cmd_encode.c
   vadpcm/vadpcm.c
 )

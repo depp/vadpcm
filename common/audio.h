@@ -2,6 +2,7 @@
 // This file is part of VADPCM. VADPCM is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #pragma once
+#include "common/defs.h"
 #include "common/extended.h"
 
 #include <stdint.h>
@@ -30,3 +31,14 @@ struct audio_pcm {
 
 // Read PCM audio from a file.
 int audio_read_pcm(struct audio_pcm *restrict audio, const char *filename);
+
+// VADPCM-encoded audio data.
+struct audio_vadpcm {
+    struct audio_meta meta;
+    struct vadpcm_codebook codebook;
+    uint8_t *encoded_data;
+};
+
+// Read VADPCM audio from a afile.
+int audio_read_vadpcm(struct audio_vadpcm *restrict audio,
+                      const char *filename);
