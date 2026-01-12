@@ -3,4 +3,4 @@
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #pragma once
 
-int vadpcmenc(int argc, char **argv);
+int cmd_encode(int argc, char **argv);

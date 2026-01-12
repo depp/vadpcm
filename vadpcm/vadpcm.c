@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
         return 2;
     }
     if (strcmp(arg, "encode") == 0) {
-        return vadpcmenc(argc, argv);
+        return cmd_encode(argc, argv);
     }
     if (strcmp(arg, "help") == 0) {
         cmd_help();

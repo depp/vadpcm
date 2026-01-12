@@ -27,7 +27,7 @@ static const char HELP[] =
     "  -p, --predictors n  Set the number of predictors to use (1..16, default 4)\n";
 // clang-format on
 
-int vadpcmenc(int argc, char **argv) {
+int cmd_encode(int argc, char **argv) {
     static const struct option long_options[] = {
         {"help", no_argument, 0, 'h'},
         {"predictors", required_argument, 0, 'p'},
