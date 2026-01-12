@@ -33,8 +33,11 @@ static void log_msg(log_level level, const char *file, int line,
         return;
     }
     flockfile(stderr);
-    fprintf(stderr, "\33[%sm%s\33[0m: %s:%d: ", LEVELS[level].color,
-            LEVELS[level].name, file, line);
+    fprintf(stderr, "\33[%sm%s\33[0m: ", LEVELS[level].color,
+            LEVELS[level].name);
+    if (g_log_level >= LEVEL_DEBUG) {
+        fprintf(stderr, "%s:%d: ", file, line);
+    }
     vfprintf(stderr, fmt, ap);
     if (has_errcode) {
         fputs(": ", stderr);
