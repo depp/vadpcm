@@ -75,7 +75,7 @@ int aiff_write(const struct aiff_data *restrict aiff, const char *filename) {
     for (int i = 0; i < kChunkCount; i++) {
         if (chunk_size[i] > 0) {
             chunk_offset[i] = file_size + 8;
-            file_size += 8 + chunk_size[i] + (chunk_size[i] & 1);
+            file_size += 8 + align32(chunk_size[i], 2);
         } else {
             chunk_offset[i] = file_size;
         }

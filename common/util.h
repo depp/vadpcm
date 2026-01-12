@@ -79,3 +79,13 @@ int input_file_read(struct input_file *file, const char *filename);
 // Write an output file, consisting of one or more parts.
 int output_file_write(const char *filename, const struct byteslice *data,
                       size_t count);
+
+// ============================================================================
+// Misc
+// ============================================================================
+
+// Pad a value to be a multiple of the alignment, which must be a power of
+// two.
+inline uint32_t align32(uint32_t value, uint32_t alignment) {
+    return (value + (alignment - 1)) & ~(alignment - 1);
+}

@@ -88,6 +88,7 @@ add_executable(vadpcm_cli
   common/extended.c
   common/file.c
   common/log.c
+  common/util.c
   vadpcm/cmd_encode.c
   vadpcm/vadpcm.c
 )
@@ -101,6 +102,7 @@ add_executable(vadpcmstats
   common/binary.c
   common/file.c
   common/log.c
+  common/util.c
   vadpcmstats/vadpcmstats.c
 )
 target_link_libraries(vadpcmstats vadpcm ${MATH_LIBRARY})

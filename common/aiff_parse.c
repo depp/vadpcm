@@ -115,7 +115,7 @@ int aiff_parse(struct aiff_data *restrict aiff, const uint8_t *ptr,
         const uint8_t *cptr = ptr + offset;
         chunk_id = read32be(cptr);
         uint32_t chunk_size = read32be(cptr + 4);
-        uint32_t chunk_size_padded = chunk_size + (chunk_size & 1);
+        uint32_t chunk_size_padded = align32(chunk_size, 2);
         offset += 8;
         cptr += 8;
         if (chunk_size_padded < chunk_size ||
