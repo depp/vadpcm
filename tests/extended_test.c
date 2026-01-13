@@ -51,7 +51,7 @@ static const struct extended_case kCases[] = {
 
 #pragma GCC diagnostic pop
 
-static bool test_extended1(const struct extended_case *restrict c) {
+static bool test_double_from_extended(const struct extended_case *restrict c) {
     log_context("extended %s", c->name);
     bool ok = true;
     for (int sign = 0; sign < 2; sign++) {
@@ -81,7 +81,7 @@ static bool test_extended1(const struct extended_case *restrict c) {
 void test_extended(void) {
     bool failed = false;
     for (size_t i = 0; i < sizeof(kCases) / sizeof(*kCases); i++) {
-        if (!test_extended1(&kCases[i])) {
+        if (!test_double_from_extended(&kCases[i])) {
             failed = true;
         }
     }
