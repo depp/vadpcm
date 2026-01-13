@@ -3,7 +3,7 @@
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #include "tests/test.h"
 
-#include "common/extension.h"
+#include "common/format.h"
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -11,31 +11,31 @@
 
 struct extension_case {
     const char *text;
-    extension value;
+    file_format format;
 };
 
 static struct extension_case kCases[] = {
-    {"dir/file.aif", kExtAIFF},
-    {"dir/file.aiff", kExtAIFF},
-    {"dir/file.aifc", kExtAIFC},
-    {"dir/file.wav", kExtWAVE},
-    {"dir/file.txt", kExtUnknown},
-    {"dir/file.abc.aiff", kExtAIFF},
-    {"", kExtUnknown},
-    {"wav", kExtUnknown},
-    {".wav", kExtUnknown},
-    {"a.wav", kExtWAVE},
-    {"a.WAV", kExtWAVE},
+    {"dir/file.aif", kFormatAIFF},
+    {"dir/file.aiff", kFormatAIFF},
+    {"dir/file.aifc", kFormatAIFC},
+    {"dir/file.wav", kFormatWAVE},
+    {"dir/file.txt", kFormatUnknown},
+    {"dir/file.abc.aiff", kFormatAIFF},
+    {"", kFormatUnknown},
+    {"wav", kFormatUnknown},
+    {".wav", kFormatUnknown},
+    {"a.wav", kFormatWAVE},
+    {"a.WAV", kFormatWAVE},
 };
 
 void test_extensions(void) {
     bool failed = false;
     for (size_t i = 0; i < sizeof(kCases) / sizeof(*kCases); i++) {
-        extension out = extension_for_file(kCases[i].text);
-        if (out != kCases[i].value) {
+        file_format out = format_for_file(kCases[i].text);
+        if (out != kCases[i].format) {
             fprintf(stderr, "extension_for_file(\"%s\") = %s; expect %s\n",
-                    kCases[i].text, name_for_extension(out),
-                    name_for_extension(kCases[i].value));
+                    kCases[i].text, name_for_format(out),
+                    name_for_format(kCases[i].format));
             failed = true;
         }
     }

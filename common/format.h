@@ -4,14 +4,14 @@
 #pragma once
 
 typedef enum {
-    kExtUnknown,
-    kExtAIFF,
-    kExtAIFC,
-    kExtWAVE,
-} extension;
+    kFormatUnknown,
+    kFormatAIFF,
+    kFormatAIFC,
+    kFormatWAVE,
+} file_format;
 
 // Figure out the filetype for a file, if we can.
-extension extension_for_file(const char *filename);
+file_format format_for_file(const char *filename);
 
 // Return the name for a file extension.
-const char *name_for_extension(extension ext);
+const char *name_for_format(file_format fmt);

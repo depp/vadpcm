@@ -1,7 +1,7 @@
 // Copyright 2026 Dietrich Epp.
 // This file is part of VADPCM. VADPCM is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
-#include "common/extension.h"
+#include "common/format.h"
 
 #include "common/util.h"
 
@@ -18,27 +18,27 @@ static int lower(int c) {
 
 struct extension_text {
     uint32_t ext;
-    extension value;
+    file_format format;
 };
 
-static const struct extension_text kExtensions[] = {
-    {FOURCC(0, 'a', 'i', 'f'), kExtAIFF},
-    {FOURCC(0, 'w', 'a', 'v'), kExtWAVE},
-    {FOURCC('a', 'i', 'f', 'f'), kExtAIFF},
-    {FOURCC('a', 'i', 'f', 'c'), kExtAIFC},
+static const struct extension_text kFormatExtensions[] = {
+    {FOURCC(0, 'a', 'i', 'f'), kFormatAIFF},
+    {FOURCC(0, 'w', 'a', 'v'), kFormatWAVE},
+    {FOURCC('a', 'i', 'f', 'f'), kFormatAIFF},
+    {FOURCC('a', 'i', 'f', 'c'), kFormatAIFC},
 };
 
-extension extension_for_file(const char *filename) {
+file_format format_for_file(const char *filename) {
     size_t size = strlen(filename);
     if (size == 0) {
-        return kExtUnknown;
+        return kFormatUnknown;
     }
     const char *p = filename + size;
     do {
         p--;
     } while (p > filename && *p != '.' && *p != '/');
     if (p <= filename || *p != '.' || *(p - 1) == '/') {
-        return kExtUnknown;
+        return kFormatUnknown;
     }
     ptrdiff_t esize = (filename + size) - p;
     uint32_t ext;
@@ -52,29 +52,30 @@ extension extension_for_file(const char *filename) {
               ((uint32_t)lower(p[3]) << 8) | (uint32_t)lower(p[4]);
         break;
     default:
-        return kExtUnknown;
+        return kFormatUnknown;
     }
-    for (size_t i = 0; i < sizeof(kExtensions) / sizeof(*kExtensions); i++) {
-        if (kExtensions[i].ext == ext) {
-            return kExtensions[i].value;
+    for (size_t i = 0;
+         i < sizeof(kFormatExtensions) / sizeof(*kFormatExtensions); i++) {
+        if (kFormatExtensions[i].ext == ext) {
+            return kFormatExtensions[i].format;
         }
     }
-    return kExtUnknown;
+    return kFormatUnknown;
 }
 
-static const char kExtensionNames[][7] = {
-    [kExtAIFF] = "AIFF",
-    [kExtAIFC] = "AIFF-C",
-    [kExtWAVE] = "WAVE",
+static const char kFormatNames[][7] = {
+    [kFormatAIFF] = "AIFF",
+    [kFormatAIFC] = "AIFF-C",
+    [kFormatWAVE] = "WAVE",
 };
 
 // Return the name for a file extension.
-const char *name_for_extension(extension ext) {
+const char *name_for_format(file_format fmt) {
     const char *name = "unknown";
-    if (0 <= ext &&
-        (size_t)ext < sizeof(kExtensionNames) / sizeof(*kExtensionNames)) {
-        if (kExtensionNames[ext][0] != '\0') {
-            name = kExtensionNames[ext];
+    if (0 <= fmt &&
+        (size_t)fmt < sizeof(kFormatNames) / sizeof(*kFormatNames)) {
+        if (kFormatNames[fmt][0] != '\0') {
+            name = kFormatNames[fmt];
         }
     }
     return name;

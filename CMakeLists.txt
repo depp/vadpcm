@@ -55,7 +55,7 @@ add_library(common STATIC
   common/audio_read_vadpcm.c
   common/binary.c
   common/extended.c
-  common/extension.c
+  common/format.c
   common/file.c
   common/log.c
   common/util.c
@@ -70,7 +70,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     add_executable(codec_test
       tests/decode_test.c
       tests/encode_test.c
-      tests/extension_test.c
+      tests/format_test.c
       tests/predictor_test.c
       tests/test.c
       tests/wave_test.c
