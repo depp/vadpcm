@@ -59,6 +59,7 @@ add_library(common STATIC
   common/file.c
   common/log.c
   common/util.c
+  common/wave_parse.c
 )
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -72,6 +73,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
       tests/extension_test.c
       tests/predictor_test.c
       tests/test.c
+      tests/wave_test.c
     )
     target_link_libraries(codec_test common vadpcm ${MATH_LIBRARY})
     add_test(

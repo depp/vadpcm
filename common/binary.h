@@ -26,6 +26,18 @@ inline uint64_t read64be(const uint8_t *ptr) {
            (uint64_t)ptr[7];
 }
 
+inline void write16be(uint8_t *ptr, uint16_t value) {
+    ptr[0] = value >> 8;
+    ptr[1] = value;
+}
+
+inline void write32be(uint8_t *ptr, uint32_t value) {
+    ptr[0] = value >> 24;
+    ptr[1] = value >> 16;
+    ptr[2] = value >> 8;
+    ptr[3] = value;
+}
+
 inline void write64be(uint8_t *ptr, uint64_t value) {
     ptr[0] = value >> 56;
     ptr[1] = value >> 48;
@@ -37,14 +49,25 @@ inline void write64be(uint8_t *ptr, uint64_t value) {
     ptr[7] = value;
 }
 
-inline void write32be(uint8_t *ptr, uint32_t value) {
-    ptr[0] = value >> 24;
-    ptr[1] = value >> 16;
-    ptr[2] = value >> 8;
-    ptr[3] = value;
+inline uint16_t read16le(const uint8_t *ptr) {
+    return (uint16_t)ptr[0] | ((uint16_t)ptr[1] << 8);
 }
 
-inline void write16be(uint8_t *ptr, uint16_t value) {
-    ptr[0] = value >> 8;
-    ptr[1] = value;
+inline uint32_t read32le(const uint8_t *ptr) {
+    return (uint32_t)ptr[0] |         //
+           ((uint32_t)ptr[1] << 8) |  //
+           ((uint32_t)ptr[2] << 16) | //
+           ((uint32_t)ptr[3] << 24);
+}
+
+inline void write16le(uint8_t *ptr, uint16_t value) {
+    ptr[0] = value;
+    ptr[1] = value >> 8;
+}
+
+inline void write32le(uint8_t *ptr, uint32_t value) {
+    ptr[0] = value;
+    ptr[1] = value >> 8;
+    ptr[2] = value >> 16;
+    ptr[3] = value >> 24;
 }

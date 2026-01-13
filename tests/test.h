@@ -38,3 +38,6 @@ void test_stability(void);
 
 // Test filename extension extraction.
 void test_extensions(void);
+
+// Test WAVE parsing.
+void test_wave(void);
