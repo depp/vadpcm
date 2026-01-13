@@ -6,8 +6,10 @@
 #include "common/extended.h"
 #include "common/util.h"
 
+#include <inttypes.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 struct extended_case {
     const char *name;
@@ -52,7 +54,7 @@ static const struct extended_case kCases[] = {
 #pragma GCC diagnostic pop
 
 static bool test_double_from_extended(const struct extended_case *restrict c) {
-    log_context("extended %s", c->name);
+    log_context("double_from_extended %s", c->name);
     bool ok = true;
     for (int sign = 0; sign < 2; sign++) {
         struct extended in = {
@@ -78,10 +80,42 @@ static bool test_double_from_extended(const struct extended_case *restrict c) {
     return ok;
 }
 
+struct extended_case_u32 {
+    const char *name;
+    uint16_t sign_exponent;
+    uint64_t fraction;
+    uint32_t value;
+};
+
+static const struct extended_case_u32 kCasesU32[] = {
+    {"zero", 0, 0, 0},
+    {"one", 16383, 1ull << 63, 1.0},
+    {"32k", 0x400d, 0xfa00000000000000ull, 32000.0},
+};
+
+static bool test_extended_from_uint32(
+    const struct extended_case_u32 *restrict c) {
+    log_context("extended_from_uint32 %s", c->name);
+    struct extended out = extended_from_uint32(c->value);
+    if (out.sign_exponent != c->sign_exponent || out.fraction != c->fraction) {
+        LOG_ERROR("got $%04" PRIx16 ":%016" PRIx64 ", expect $%04" PRIx16
+                  ":%016" PRIx64,
+                  out.sign_exponent, out.fraction, c->sign_exponent,
+                  c->fraction);
+        return false;
+    }
+    return true;
+}
+
 void test_extended(void) {
     bool failed = false;
     for (size_t i = 0; i < sizeof(kCases) / sizeof(*kCases); i++) {
         if (!test_double_from_extended(&kCases[i])) {
+            failed = true;
+        }
+    }
+    for (size_t i = 0; i < sizeof(kCasesU32) / sizeof(*kCasesU32); i++) {
+        if (!test_extended_from_uint32(&kCasesU32[i])) {
             failed = true;
         }
     }

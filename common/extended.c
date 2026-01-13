@@ -24,3 +24,21 @@ double double_from_extended(const struct extended *extended) {
     double value = scalbn((double)extended->fraction, exponent - 16383 - 63);
     return sign ? -value : value;
 }
+
+struct extended extended_from_uint32(uint32_t value) {
+    if (value == 0) {
+        return (struct extended){
+            .sign_exponent = 0,
+            .fraction = 0,
+        };
+    }
+    union {
+        double f;
+        uint64_t u;
+    } u;
+    u.f = (double)value;
+    return (struct extended){
+        .sign_exponent = (u.u >> 52) + 16384 - 1024,
+        .fraction = (u.u << 11) | (1ull << 63),
+    };
+}
