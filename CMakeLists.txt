@@ -70,6 +70,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     add_executable(codec_test
       tests/decode_test.c
       tests/encode_test.c
+      tests/extended_test.c
       tests/format_test.c
       tests/predictor_test.c
       tests/test.c

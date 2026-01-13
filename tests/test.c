@@ -99,6 +99,7 @@ int main(int argc, char **argv) {
     test_solve();
     test_stability();
     test_extensions();
+    test_extended();
     test_wave();
     for (int i = 0; kAIFFNames[i] != NULL; i++) {
         test_file(kAIFFNames[i]);

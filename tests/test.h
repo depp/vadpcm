@@ -41,3 +41,6 @@ void test_extensions(void);
 
 // Test WAVE parsing.
 void test_wave(void);
+
+// Test extended float conversion.
+void test_extended(void);

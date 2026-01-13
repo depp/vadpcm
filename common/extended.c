@@ -21,5 +21,6 @@ double double_from_extended(const struct extended *extended) {
     if (extended->fraction == 0) {
         return 0.0;
     }
-    return scalbn((double)extended->fraction, exponent - 16383 - 63);
+    double value = scalbn((double)extended->fraction, exponent - 16383 - 63);
+    return sign ? -value : value;
 }
