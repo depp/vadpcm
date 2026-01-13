@@ -3,6 +3,7 @@
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #include "codec/vadpcm.h"
 #include "common/audio.h"
+#include "common/format.h"
 #include "common/util.h"
 
 #include <errno.h>
@@ -49,8 +50,14 @@ static const char HELP[] =
 
 static void collect_stats(struct vadpcm_params *params, const char *input_file,
                           struct vadpcm_stats *stats) {
+    log_context("encode %s", input_file);
+    file_format format = format_for_file(input_file);
+    if (format == kFormatUnknown) {
+        LOG_ERROR("unknown or unsupported format");
+        goto error;
+    }
     struct audio_pcm audio;
-    int r = audio_read_pcm(&audio, input_file);
+    int r = audio_read_pcm(&audio, input_file, kFormatAIFF);
     if (r != 0) {
         goto error;
     }
@@ -105,6 +112,7 @@ static void *collect_stats_loop(void *arg) {
     }
     r = pthread_mutex_unlock(&state->mutex);
     CHECK_PTHREAD;
+    log_context_clear();
     return NULL;
 }
 

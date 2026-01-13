@@ -4,6 +4,7 @@
 #pragma once
 #include "common/defs.h"
 #include "common/extended.h"
+#include "common/format.h"
 
 #include <stdint.h>
 
@@ -30,7 +31,8 @@ struct audio_pcm {
 };
 
 // Read PCM audio from a file.
-int audio_read_pcm(struct audio_pcm *restrict audio, const char *filename);
+int audio_read_pcm(struct audio_pcm *restrict audio, const char *filename,
+                   file_format format);
 
 // VADPCM-encoded audio data.
 struct audio_vadpcm {
@@ -39,6 +41,6 @@ struct audio_vadpcm {
     uint8_t *encoded_data;
 };
 
-// Read VADPCM audio from a afile.
+// Read VADPCM audio from a file.
 int audio_read_vadpcm(struct audio_vadpcm *restrict audio,
                       const char *filename);

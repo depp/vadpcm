@@ -67,7 +67,7 @@ static void test_file(const char *name) {
              name);
 
     struct audio_pcm pcm;
-    if (audio_read_pcm(&pcm, pcm_path) != 0) {
+    if (audio_read_pcm(&pcm, pcm_path, kFormatAIFF) != 0) {
         test_failure_count++;
         return;
     }
