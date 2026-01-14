@@ -4,6 +4,7 @@
 #include "codec/vadpcm.h"
 #include "common/aiff.h"
 #include "common/audio.h"
+#include "common/format.h"
 #include "common/util.h"
 #include "vadpcm/commands.h"
 
@@ -79,6 +80,12 @@ int cmd_decode(int argc, char **argv) {
     }
     const char *input_file = argv[optind];
     const char *output_file = argv[optind + 1];
+    file_format input_format = format_for_file(input_file);
+    file_format output_format = format_for_file(output_file);
+    if (!check_format_vadpcm(input_file, input_format) ||
+        !check_format_pcm_output(output_file, output_format)) {
+        return 1;
+    }
 
     // Read input.
     log_context("read %s", input_file);

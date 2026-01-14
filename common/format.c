@@ -80,3 +80,39 @@ const char *name_for_format(file_format fmt) {
     }
     return name;
 }
+
+static void log_unknown(void) {
+    LOG_ERROR("unknown file format (unrecognized extension)");
+}
+
+bool check_format_pcm_input(const char *name, file_format fmt) {
+    if (fmt == kFormatUnknown) {
+        log_context("%s", name);
+        log_unknown();
+        return false;
+    }
+    return true;
+}
+
+bool check_format_pcm_output(const char *name, file_format fmt) {
+    if (fmt == kFormatUnknown) {
+        log_context("%s", name);
+        log_unknown();
+        return false;
+    }
+    return true;
+}
+
+bool check_format_vadpcm(const char *name, file_format fmt) {
+    if (fmt != kFormatAIFC) {
+        log_context("%s", name);
+        if (fmt == kFormatUnknown) {
+            log_unknown();
+        } else {
+            LOG_ERROR("file format does not support VADPCM audio; format=%s",
+                      name_for_format(fmt));
+        }
+        return false;
+    }
+    return true;
+}

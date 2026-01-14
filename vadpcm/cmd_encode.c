@@ -84,19 +84,9 @@ int cmd_encode(int argc, char **argv) {
     const char *input_file = argv[optind];
     const char *output_file = argv[optind + 1];
     file_format input_format = format_for_file(input_file);
-    if (input_format == kFormatUnknown) {
-        log_context("read %s", input_file);
-        LOG_ERROR("unknown file format (unrecognized extension)");
-        return 1;
-    }
     file_format output_format = format_for_file(output_file);
-    if (output_format != kFormatAIFF && output_format != kFormatAIFC) {
-        log_context("write %s", output_file);
-        if (output_format == kFormatUnknown) {
-            LOG_ERROR("unknown file format (unrecognized extension)");
-        } else {
-            LOG_ERROR("file format does not support VADPCM");
-        }
+    if (!check_format_pcm_input(input_file, input_format) ||
+        !check_format_vadpcm(output_file, output_format)) {
         return 1;
     }
     if (g_log_level >= LEVEL_DEBUG) {
