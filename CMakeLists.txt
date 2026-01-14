@@ -53,6 +53,7 @@ add_library(common STATIC
   common/alloc.c
   common/audio_read_pcm.c
   common/audio_read_vadpcm.c
+  common/audio_write_pcm.c
   common/binary.c
   common/extended.c
   common/format.c

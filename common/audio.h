@@ -34,6 +34,11 @@ struct audio_pcm {
 int audio_read_pcm(struct audio_pcm *restrict audio, const char *filename,
                    file_format format);
 
+// Write PCM audio to a file. NOTE: This will modify the PCM data in-place if
+// convenient.
+int audio_write_pcm(struct audio_pcm *restrict audio, const char *filename,
+                    file_format format);
+
 // VADPCM-encoded audio data.
 struct audio_vadpcm {
     struct audio_meta meta;

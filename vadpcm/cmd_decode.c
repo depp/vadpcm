@@ -2,7 +2,6 @@
 // This file is part of VADPCM. VADPCM is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #include "codec/vadpcm.h"
-#include "common/aiff.h"
 #include "common/audio.h"
 #include "common/format.h"
 #include "common/util.h"
@@ -24,22 +23,6 @@ static const char HELP[] =
     "  -h, --help          Show this help text\n"
     "  -q, --quiet         Only print warnings and errors\n";
 // clang-format on
-
-static void swap16_inplace(int16_t *ptr, size_t size);
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-static void swap16_inplace(int16_t *ptr, size_t size) {
-    for (size_t i = 0; i < size; i++) {
-        ptr[i] = __builtin_bswap16(ptr[i]);
-    }
-}
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-static void swap16_inplace(int16_t *ptr, size_t size) {
-    (void)ptr;
-    (void)size;
-}
-#else
-#error "Unknown byte order"
-#endif
 
 int cmd_decode(int argc, char **argv) {
     // Parse command-line.
@@ -114,21 +97,12 @@ int cmd_decode(int argc, char **argv) {
 
     // Write output.
     log_context("write %s", output_file);
-    swap16_inplace(pcm_data, audio.meta.padded_sample_count);
-    struct aiff_data aiff = {
-        .version = kAIFF,
-        .num_channels = 1,
-        .num_sample_frames = audio.meta.original_sample_count,
-        .sample_size = 16,
-        .sample_rate = audio.meta.sample_rate,
-        .codec = kAIFFCodecPCM,
-        .audio =
-            {
-                .ptr = pcm_data,
-                .size = sizeof(*pcm_data) * audio.meta.original_sample_count,
-            },
-    };
-    r = aiff_write(&aiff, output_file);
+    r = audio_write_pcm(
+        &(struct audio_pcm){
+            .meta = audio.meta,
+            .sample_data = pcm_data,
+        },
+        output_file, output_format);
     if (r != 0) {
         return 1;
     }

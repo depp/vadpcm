@@ -29,7 +29,7 @@ typedef enum {
 // A parsed AIFF or AIFF-C file.
 struct aiff_data {
     aiff_version version;
-    uint32_t version_timestamp; // FVER for AIFF-C.
+    uint32_t version_timestamp; // FVER for AIFF-C. Ignored when writing AIFF.
 
     // COMM chunk.
     uint32_t num_channels;
