@@ -16,3 +16,14 @@ uint32_t read32le(const uint8_t *ptr);
 
 void write16le(uint8_t *ptr, uint16_t value);
 void write32le(uint8_t *ptr, uint32_t value);
+
+void swap16le(void *dest, const void *src, size_t size);
+void swap16le_inplace(void *ptr, size_t size);
+void swap16be(void *dest, const void *src, size_t size);
+void swap16be_inplace(void *ptr, size_t size);
+
+void swap16(void *dest, const void *src, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        ((uint16_t *)dest)[i] = __builtin_bswap16(((const uint16_t *)src)[i]);
+    }
+}

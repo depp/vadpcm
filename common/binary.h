@@ -2,7 +2,13 @@
 // This file is part of VADPCM. VADPCM is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #pragma once
+#include <stddef.h>
 #include <stdint.h>
+#include <string.h>
+
+// ============================================================================
+// Scalar Operations
+// ============================================================================
 
 inline uint16_t read16be(const uint8_t *ptr) {
     return ((uint16_t)ptr[0] << 8) | (uint16_t)ptr[1];
@@ -71,3 +77,54 @@ inline void write32le(uint8_t *ptr, uint32_t value) {
     ptr[2] = value >> 16;
     ptr[3] = value >> 24;
 }
+
+// ============================================================================
+// Array Operations
+// ============================================================================
+
+// Byte-swap 16-bit values. The number of 16-bit values is given by 'size'.
+void swap16(void *dest, const void *src, size_t size);
+
+// Swap 16-bit values between little endian and native.
+inline void swap16le(void *dest, const void *src, size_t size);
+
+// Swap 16-bit values between little endian and native.
+inline void swap16le_inplace(void *ptr, size_t size);
+
+// Swap 16-bit values between big endian and native.
+inline void swap16be(void *dest, const void *src, size_t size);
+
+// Swap 16-bit values between big endian and native.
+inline void swap16be_inplace(void *ptr, size_t size);
+
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+inline void swap16le(void *dest, const void *src, size_t size) {
+    memcpy(dest, src, 2 * size);
+}
+inline void swap16le_inplace(void *ptr, size_t size) {
+    (void)ptr;
+    (void)size;
+}
+inline void swap16be(void *dest, const void *src, size_t size) {
+    swap16(dest, src, size);
+}
+inline void swap16be_inplace(void *ptr, size_t size) {
+    swap16(ptr, ptr, size);
+}
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+inline void swap16le(void *dest, const void *src, size_t size) {
+    swap16(dest, src, size);
+}
+inline void swap16le_inplace(void *ptr, size_t size) {
+    swap16(ptr, ptr, size);
+}
+inline void swap16be(void *dest, const void *src, size_t size) {
+    memcpy(dest, src, 2 * size);
+}
+inline void swap16be_inplace(void *ptr, size_t size) {
+    (void)ptr;
+    (void)size;
+}
+#else
+#error "Unknown byte order"
+#endif

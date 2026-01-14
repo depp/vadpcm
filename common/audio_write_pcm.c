@@ -4,27 +4,12 @@
 #include "common/audio.h"
 
 #include "common/aiff.h"
+#include "common/binary.h"
 #include "common/util.h"
-
-static void swap16_inplace(int16_t *ptr, size_t size);
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-static void swap16_inplace(int16_t *ptr, size_t size) {
-    for (size_t i = 0; i < size; i++) {
-        ptr[i] = __builtin_bswap16(ptr[i]);
-    }
-}
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-static void swap16_inplace(int16_t *ptr, size_t size) {
-    (void)ptr;
-    (void)size;
-}
-#else
-#error "Unknown byte order"
-#endif
 
 static int audio_write_aiff(struct audio_pcm *restrict audio,
                             const char *filename, aiff_version version) {
-    swap16_inplace(audio->sample_data, audio->meta.padded_sample_count);
+    swap16le_inplace(audio->sample_data, audio->meta.padded_sample_count);
     struct aiff_data aiff = {
         .version = version,
         .version_timestamp = kAIFCVersion1,

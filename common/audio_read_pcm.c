@@ -5,6 +5,7 @@
 
 #include "codec/vadpcm.h"
 #include "common/aiff.h"
+#include "common/binary.h"
 #include "common/extended.h"
 #include "common/util.h"
 #include "common/wave.h"
@@ -12,19 +13,6 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <string.h>
-
-// Copy 16-bit big-endian samples into the destination.
-static void copy_samples_16be(int16_t *dest, const uint8_t *src, size_t n) {
-    for (size_t i = 0; i < n; i++) {
-        dest[i] = ((uint16_t)src[2 * i] << 8) | (uint16_t)src[2 * i + 1];
-    }
-}
-
-static void copy_samples_16le(int16_t *dest, const uint8_t *src, size_t n) {
-    for (size_t i = 0; i < n; i++) {
-        dest[i] = (uint16_t)src[2 * i] | ((uint16_t)src[2 * i + 1] << 8);
-    }
-}
 
 static bool audio_check_format(int channel_count, int sample_size) {
     bool ok = true;
@@ -84,7 +72,7 @@ static int audio_read_aiff(struct audio_pcm *restrict audio,
     uint32_t padded_sample_count =
         align32(original_sample_count, kVADPCMFrameSampleCount);
     int16_t *sample_data = XMALLOC(padded_sample_count, sizeof(*sample_data));
-    copy_samples_16be(sample_data, aiff.audio.ptr, aiff.num_sample_frames);
+    swap16be(sample_data, aiff.audio.ptr, aiff.num_sample_frames);
     memset(sample_data + original_sample_count, 0,
            sizeof(int16_t) * (padded_sample_count - original_sample_count));
     *audio = (struct audio_pcm){
@@ -130,7 +118,7 @@ static int audio_read_wave(struct audio_pcm *restrict audio,
     uint32_t padded_sample_count =
         align32(original_sample_count, kVADPCMFrameSampleCount);
     int16_t *sample_data = XMALLOC(padded_sample_count, sizeof(*sample_data));
-    copy_samples_16le(sample_data, wave.audio.ptr, original_sample_count);
+    swap16le(sample_data, wave.audio.ptr, original_sample_count);
     memset(sample_data + original_sample_count, 0,
            sizeof(int16_t) * (padded_sample_count - original_sample_count));
     *audio = (struct audio_pcm){
