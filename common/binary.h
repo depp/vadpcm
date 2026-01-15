@@ -10,6 +10,11 @@
 // Scalar Operations
 // ============================================================================
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4244)
+#endif
+
 inline uint16_t read16be(const uint8_t *ptr) {
     return ((uint16_t)ptr[0] << 8) | (uint16_t)ptr[1];
 }
@@ -77,6 +82,10 @@ inline void write32le(uint8_t *ptr, uint32_t value) {
     ptr[2] = value >> 16;
     ptr[3] = value >> 24;
 }
+
+#if _MSC_VER
+#pragma warning(pop)
+#endif
 
 // ============================================================================
 // Array Operations
