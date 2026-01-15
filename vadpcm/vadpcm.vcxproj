@@ -30,6 +30,7 @@
     <ClCompile Include="..\common\extended.c" />
     <ClCompile Include="..\common\file.c" />
     <ClCompile Include="..\common\format.c" />
+    <ClCompile Include="..\common\getopt.c" />
     <ClCompile Include="..\common\log.c" />
     <ClCompile Include="..\common\util.c" />
     <ClCompile Include="..\common\wave_parse.c" />
@@ -46,6 +47,7 @@
     <ClInclude Include="..\common\defs.h" />
     <ClInclude Include="..\common\extended.h" />
     <ClInclude Include="..\common\format.h" />
+    <ClInclude Include="..\common\getopt.h" />
     <ClInclude Include="..\common\util.h" />
     <ClInclude Include="..\common\wave.h" />
     <ClInclude Include="..\common\wave_internal.h" />

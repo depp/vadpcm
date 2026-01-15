@@ -56,8 +56,13 @@ static void log_msg(log_level level, const char *file, int line,
         return;
     }
     LOCK_FILE(stderr);
+#if _WIN32
+    // TODO: Color on Windows
+    fprintf(stderr, "%s: ", LEVELS[level].name);
+#else
     fprintf(stderr, "\33[%sm%s\33[0m: ", LEVELS[level].color,
             LEVELS[level].name);
+#endif
     if (g_log_level >= LEVEL_DEBUG) {
         fprintf(stderr, "%s:%d: ", file, line);
     }

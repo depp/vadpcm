@@ -5,10 +5,10 @@
 #include "common/aiff.h"
 #include "common/audio.h"
 #include "common/format.h"
+#include "common/getopt.h"
 #include "common/util.h"
 #include "vadpcm/commands.h"
 
-#include <getopt.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
