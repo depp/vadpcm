@@ -7,11 +7,17 @@ project(VADPCM
   DESCRIPTION "VADPCM audio codec"
   LANGUAGES C)
 
+# Todo: This is a janky CMake file.
+
 option(ENABLE_WARNINGS "enable C warning flags")
 option(ENABLE_WERROR "treat warnings as errors")
 set(SANITIZERS OFF CACHE STRING "enable sanitizers")
 
-add_compile_options(-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}/=)
+if(MSVC)
+  add_compile_options(/std:c17)
+else()
+  add_compile_options(-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}/=)
+endif()
 
 if(ENABLE_WARNINGS)
   add_compile_options(
@@ -27,8 +33,10 @@ if(SANITIZERS)
   add_link_options("-fsanitize=${SANITIZERS}")
 endif()
 
-add_compile_options(-pthread)
-add_link_options(-pthread)
+if(NOT WIN32)
+  add_compile_options(-pthread)
+  add_link_options(-pthread)
+endif()
 
 include_directories(.)
 
@@ -63,8 +71,11 @@ add_library(common STATIC
   common/wave_parse.c
   common/wave_write.c
 )
+if(WIN32)
+  target_sources(common PRIVATE common/getopt.c)
+endif()
 
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME) AND UNIX)
 
   # Build and run tests.
   include(CTest)
@@ -78,7 +89,10 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
       tests/test.c
       tests/wave_test.c
     )
-    target_link_libraries(codec_test common vadpcm ${MATH_LIBRARY})
+    target_link_libraries(codec_test common vadpcm)
+    if(MATH_LIBRARY)
+      target_link_libraries(codec_test ${MATH_LIBRARY})
+    endif()
     add_test(
       NAME codec_test
       COMMAND $<TARGET_FILE:codec_test>
@@ -102,9 +116,17 @@ add_executable(vadpcm_cli
   vadpcm/vadpcm.c
 )
 set_target_properties(vadpcm_cli PROPERTIES OUTPUT_NAME vadpcm)
-target_link_libraries(vadpcm_cli common vadpcm ${MATH_LIBRARY})
+target_link_libraries(vadpcm_cli common vadpcm)
+if(MATH_LIBRARY)
+  target_link_libraries(vadpcm_cli ${MATH_LIBRARY})
+endif()
 
-add_executable(vadpcmstats
-  vadpcmstats/vadpcmstats.c
-)
-target_link_libraries(vadpcmstats common vadpcm ${MATH_LIBRARY})
+if(UNIX)
+  add_executable(vadpcmstats
+    vadpcmstats/vadpcmstats.c
+  )
+  target_link_libraries(vadpcmstats common vadpcm)
+  if(MATH_LIBRARY)
+    target_link_libraries(vadpcmstats ${MATH_LIBRARY})
+  endif()
+endif()
