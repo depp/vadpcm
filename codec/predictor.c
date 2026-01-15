@@ -27,8 +27,7 @@ enum {
     kVADPCMIterations = 20,
 };
 
-float vadpcm_eval(const float *restrict corr,
-                  const float *restrict coeff);
+float vadpcm_eval(const float *restrict corr, const float *restrict coeff);
 
 double vadpcm_eval_solved(const double *restrict corr,
                           const double *restrict coeff);
@@ -85,8 +84,7 @@ void vadpcm_meancorrs(size_t frame_count, int predictor_count,
     }
 }
 
-void vadpcm_solve(const double *restrict corr,
-                  double *restrict coeff) {
+void vadpcm_solve(const double *restrict corr, double *restrict coeff) {
     // For the autocorrelation matrix A, we want vector v which minimizes the
     // residual \epsilon,
     //

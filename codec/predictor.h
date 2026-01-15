@@ -62,8 +62,7 @@ void vadpcm_meancorrs(size_t frame_count, int predictor_count,
 
 // Calculate the predictor coefficients, given an autocorrelation matrix. The
 // coefficients are chosen to minimize vadpcm_eval.
-void vadpcm_solve(const double *restrict corr,
-                  double *restrict coeff);
+void vadpcm_solve(const double *restrict corr, double *restrict coeff);
 
 // Adjust predictor coefficients to make them stable. Return 0 if the input
 // coefficients are stable and 1 if the input coefficients are unstable and
