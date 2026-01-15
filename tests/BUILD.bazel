@@ -1,0 +1,27 @@
+load("@rules_cc//cc:defs.bzl", "cc_test")
+load("//bazel:copts.bzl", "COPTS")
+
+cc_test(
+    name = "tests",
+    size = "small",
+    srcs = [
+        "decode_test.c",
+        "encode_test.c",
+        "predictor_test.c",
+        "test.c",
+        "test.h",
+    ],
+    copts = COPTS,
+    data = [
+        "data/sfx1.pcm.aiff",
+        "data/sfx1.vadpcm.aifc",
+        "formats/wave16.wav",
+        "formats/wave24.wav",
+        "formats/wave32.wav",
+        "formats/wave8.wav",
+    ],
+    deps = [
+        "//codec",
+        "//common",
+    ],
+)

@@ -1,0 +1,38 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//bazel:copts.bzl", "COPTS")
+
+cc_library(
+    name = "common",
+    srcs = [
+        "aiff_common.c",
+        "aiff_internal.h",
+        "aiff_parse.c",
+        "aiff_write.c",
+        "alloc.c",
+        "audio_read_pcm.c",
+        "audio_read_vadpcm.c",
+        "audio_write_pcm.c",
+        "binary.c",
+        "extended.c",
+        "file.c",
+        "format.c",
+        "log.c",
+        "util.c",
+        "wave_internal.h",
+        "wave_parse.c",
+        "wave_write.c",
+    ],
+    hdrs = [
+        "aiff.h",
+        "audio.h",
+        "binary.h",
+        "defs.h",
+        "extended.h",
+        "format.h",
+        "util.h",
+        "wave.h",
+    ],
+    copts = COPTS,
+    visibility = ["//visibility:public"],
+    deps = ["//codec"],
+)

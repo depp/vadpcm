@@ -1,0 +1,18 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+load("//bazel:copts.bzl", "COPTS")
+
+cc_binary(
+    name = "vadpcm",
+    srcs = [
+        "cmd_decode.c",
+        "cmd_encode.c",
+        "commands.h",
+        "vadpcm.c",
+    ],
+    copts = COPTS,
+    visibility = ["//visibility:public"],
+    deps = [
+        "//codec",
+        "//common",
+    ],
+)
