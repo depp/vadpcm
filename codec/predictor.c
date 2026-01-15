@@ -279,7 +279,7 @@ static size_t vadpcm_worst_frame(size_t frame_count,
 vadpcm_error vadpcm_assign_predictors(size_t frame_count, int predictor_count,
                                       const float (*restrict corr)[6],
                                       uint8_t *restrict predictors) {
-    memset(predictors, 0, predictor_count);
+    memset(predictors, 0, frame_count);
     if (predictor_count <= 1) {
         return 0;
     }
