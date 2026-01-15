@@ -4,6 +4,12 @@
 #pragma once
 #include <stddef.h>
 
+#if __GNUC__
+#define ATTRIBUTE(attrs) __attribute__(attrs)
+#else
+#define ATTRIBUTE(attrs)
+#endif
+
 // Reference to a region of byte data. Does not own its contents.
 struct byteslice {
     const void *ptr;

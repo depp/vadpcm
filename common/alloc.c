@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 static void alloc_failed(const char *file, int line, size_t nmemb, size_t size)
-    __attribute__((noreturn));
+    ATTRIBUTE((noreturn));
 
 static void alloc_failed(const char *file, int line, size_t nmemb,
                          size_t size) {

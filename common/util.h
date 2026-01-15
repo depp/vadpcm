@@ -2,6 +2,7 @@
 // This file is part of VADPCM. VADPCM is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #pragma once
+#include "common/defs.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -23,19 +24,19 @@ extern log_level g_log_level;
 
 // Show an error message.
 void log_error(const char *file, int line, const char *fmt, ...)
-    __attribute__((format(printf, 3, 4)));
+    ATTRIBUTE((format(printf, 3, 4)));
 
 // Show an error message, with an error code from errno appended.
 void log_error_errno(const char *file, int line, int errcode, const char *fmt,
-                     ...) __attribute__((format(printf, 4, 5)));
+                     ...) ATTRIBUTE((format(printf, 4, 5)));
 
 // Show an informational message.
 void log_info(const char *file, int line, const char *fmt, ...)
-    __attribute__((format(printf, 3, 4)));
+    ATTRIBUTE((format(printf, 3, 4)));
 
 // Show a debugging message.
 void log_debug(const char *file, int line, const char *fmt, ...)
-    __attribute__((format(printf, 3, 4)));
+    ATTRIBUTE((format(printf, 3, 4)));
 
 #define LOG_ERROR(...) log_error(__FILE__, __LINE__, __VA_ARGS__)
 #define LOG_ERROR_ERRNO(errcode, ...) \
@@ -45,7 +46,7 @@ void log_debug(const char *file, int line, const char *fmt, ...)
 
 // Set additional context for logging. This will be printed before each log
 // message. This is tracked with a thread-local variable.
-void log_context(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+void log_context(const char *fmt, ...) ATTRIBUTE((format(printf, 1, 2)));
 
 // Clear additional context for logging.
 void log_context_clear(void);
@@ -55,9 +56,9 @@ void log_context_clear(void);
 // ============================================================================
 
 void *xmalloc(const char *file, int line, size_t nmemb, size_t size)
-    __attribute__((malloc, alloc_size(3, 4)));
+    ATTRIBUTE((malloc, alloc_size(3, 4)));
 void *xcalloc(const char *file, int line, size_t nmemb, size_t size)
-    __attribute__((malloc, alloc_size(3, 4)));
+    ATTRIBUTE((malloc, alloc_size(3, 4)));
 
 #define XMALLOC(nmemb, size) xmalloc(__FILE__, __LINE__, nmemb, size)
 #define XCALLOC(nmemb, size) xcalloc(__FILE__, __LINE__, nmemb, size)
