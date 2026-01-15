@@ -42,3 +42,14 @@ struct extended extended_from_uint32(uint32_t value) {
         .fraction = (u.u << 11) | (1ull << 63),
     };
 }
+
+uint32_t uint32_from_extended(const struct extended *extended) {
+    double value = round(double_from_extended(extended));
+    if (!(0.0 <= value)) {
+        return 0;
+    }
+    if (!(value <= (double)0xffffffff)) {
+        return 0xffffffff;
+    }
+    return (uint32_t)value;
+}

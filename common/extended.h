@@ -16,3 +16,6 @@ double double_from_extended(const struct extended *extended);
 
 // Convert a uint32_t to extended.
 struct extended extended_from_uint32(uint32_t value);
+
+// Convert an extended to uint32_t.
+uint32_t uint32_from_extended(const struct extended *extended);

@@ -4,7 +4,6 @@
 #pragma once
 #include "common/defs.h"
 
-#include <stddef.h>
 #include <stdint.h>
 
 enum {
@@ -29,3 +28,6 @@ struct wave_data {
 // Parse a WAVE file. Returns 0 on success.
 int wave_parse(struct wave_data *restrict wave, const uint8_t *ptr,
                size_t size);
+
+// Write a WAVE file to disk. Returns 0 on success.
+int wave_write(struct wave_data *restrict wave, const char *filename);

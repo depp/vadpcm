@@ -61,6 +61,7 @@ add_library(common STATIC
   common/log.c
   common/util.c
   common/wave_parse.c
+  common/wave_write.c
 )
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
