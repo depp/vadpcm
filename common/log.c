@@ -9,15 +9,34 @@
 
 #include "common/util.h"
 
-#include <errno.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#if _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#define LOCK_FILE(x) (void)0
+#define UNLOCK_FILE(x) (void)0
+#else
+#define LOCK_FILE flockfile
+#define UNLOCK_FILE funlockfile
+#endif
+
+#if _MSC_VER
+#pragma warning(disable : 6504)
+#endif
+
 log_level g_log_level = LEVEL_INFO;
-static char *g_log_context;
+
+struct log_context {
+    const char *operation;
+    const char *path;
+};
+
+struct log_context g_log_context;
 
 struct log_level {
     char color[5];
@@ -33,23 +52,49 @@ static const struct log_level LEVELS[] = {
 static void log_msg(log_level level, const char *file, int line,
                     bool has_errcode, int errcode, const char *fmt,
                     va_list ap) {
-    if (level > g_log_level) {
+    if (level > g_log_level || level < 0) {
         return;
     }
-    flockfile(stderr);
+    LOCK_FILE(stderr);
     fprintf(stderr, "\33[%sm%s\33[0m: ", LEVELS[level].color,
             LEVELS[level].name);
     if (g_log_level >= LEVEL_DEBUG) {
         fprintf(stderr, "%s:%d: ", file, line);
     }
-    char *ctx = g_log_context;
-    if (ctx != NULL) {
-        fputs(ctx, stderr);
+    struct log_context ctx = g_log_context;
+    if (ctx.operation != NULL) {
+        fputc(' ', stderr);
+        fputs(ctx.operation, stderr);
+        fputc(' ', stderr);
+        fputs(ctx.path, stderr);
         fputs(": ", stderr);
     }
     vfprintf(stderr, fmt, ap);
     if (has_errcode) {
         fputs(": ", stderr);
+#if _WIN32
+        DWORD flags =
+            FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS;
+        DWORD lang_id = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
+        char buf[1024];
+        DWORD result = FormatMessageA(flags, NULL, errcode, lang_id, buf,
+                                      sizeof(buf), NULL);
+        if (result != 0) {
+            fwrite(buf, 1, result, stderr);
+        } else if (GetLastError() == ERROR_MORE_DATA) {
+            char *ptr;
+            flags |= FORMAT_MESSAGE_ALLOCATE_BUFFER;
+            result = FormatMessageA(flags, NULL, errcode, lang_id, (char *)&ptr,
+                                    0, NULL);
+            if (result == 0) {
+                abort();
+            }
+            fwrite(ptr, 1, result, stderr);
+            LocalFree(ptr);
+        } else {
+            fprintf(stderr, "error code = %lu", errcode);
+        }
+#else
         char buf[1024];
         int r = strerror_r(errcode, buf, sizeof(buf));
         if (r == 0) {
@@ -57,9 +102,10 @@ static void log_msg(log_level level, const char *file, int line,
         } else {
             fprintf(stderr, "errno = %d", errcode);
         }
+#endif
     }
     fputc('\n', stderr);
-    funlockfile(stderr);
+    UNLOCK_FILE(stderr);
 }
 
 void log_error(const char *file, int line, const char *fmt, ...) {
@@ -91,28 +137,12 @@ void log_debug(const char *file, int line, const char *fmt, ...) {
     va_end(ap);
 }
 
-static void log_context_set(char *value) {
-    if (g_log_context != NULL) {
-        free(g_log_context);
-    }
-    g_log_context = value;
-}
-
-void log_context(const char *fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-    char *ptr;
-    int r = vasprintf(&ptr, fmt, ap);
-    if (r == -1) {
-        LOG_ERROR_ERRNO(errno, "vasprintf");
-        abort();
-    }
-    va_end(ap);
-    log_context_set(ptr);
+void log_context(const char *operation, const char *path) {
+    g_log_context = (struct log_context){.operation = operation, .path = path};
 }
 
 void log_context_clear(void) {
-    log_context_set(NULL);
+    g_log_context = (struct log_context){.operation = NULL, .path = NULL};
 }
 
 static char hexdigit(int x) {

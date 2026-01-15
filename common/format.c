@@ -87,7 +87,7 @@ static void log_unknown(void) {
 
 bool check_format_pcm_input(const char *name, file_format fmt) {
     if (fmt == kFormatUnknown) {
-        log_context("%s", name);
+        log_context("input", name);
         log_unknown();
         return false;
     }
@@ -96,7 +96,7 @@ bool check_format_pcm_input(const char *name, file_format fmt) {
 
 bool check_format_pcm_output(const char *name, file_format fmt) {
     if (fmt == kFormatUnknown) {
-        log_context("%s", name);
+        log_context("output", name);
         log_unknown();
         return false;
     }
@@ -105,7 +105,7 @@ bool check_format_pcm_output(const char *name, file_format fmt) {
 
 bool check_format_vadpcm(const char *name, file_format fmt) {
     if (fmt != kFormatAIFC) {
-        log_context("%s", name);
+        log_context("vadpcm file", name);
         if (fmt == kFormatUnknown) {
             log_unknown();
         } else {

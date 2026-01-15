@@ -45,8 +45,8 @@ void log_debug(const char *file, int line, const char *fmt, ...)
 #define LOG_DEBUG(...) log_debug(__FILE__, __LINE__, __VA_ARGS__)
 
 // Set additional context for logging. This will be printed before each log
-// message. This is tracked with a thread-local variable.
-void log_context(const char *fmt, ...) ATTRIBUTE((format(printf, 1, 2)));
+// message.
+void log_context(const char *operation, const char *path);
 
 // Clear additional context for logging.
 void log_context_clear(void);

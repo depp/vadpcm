@@ -71,7 +71,7 @@ int cmd_decode(int argc, char **argv) {
     }
 
     // Read input.
-    log_context("read %s", input_file);
+    log_context("read", input_file);
     struct audio_vadpcm audio;
     int r = audio_read_vadpcm(&audio, input_file);
     if (r != 0) {
@@ -80,7 +80,7 @@ int cmd_decode(int argc, char **argv) {
     LOG_INFO("sample rate: %f", double_from_extended(&audio.meta.sample_rate));
 
     // Decode.
-    log_context("decode %s", input_file);
+    log_context("decode", input_file);
     int16_t *pcm_data =
         XMALLOC(audio.meta.padded_sample_count, sizeof(*pcm_data));
     struct vadpcm_vector state;
@@ -96,7 +96,7 @@ int cmd_decode(int argc, char **argv) {
     }
 
     // Write output.
-    log_context("write %s", output_file);
+    log_context("write", output_file);
     r = audio_write_pcm(
         &(struct audio_pcm){
             .meta = audio.meta,

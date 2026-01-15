@@ -96,7 +96,7 @@ int cmd_encode(int argc, char **argv) {
     }
 
     // Read input.
-    log_context("read %s", input_file);
+    log_context("read", input_file);
     struct audio_pcm audio;
     int r = audio_read_pcm(&audio, input_file, input_format);
     if (r != 0) {
@@ -108,7 +108,7 @@ int cmd_encode(int argc, char **argv) {
     }
 
     // Encode.
-    log_context("encode %s", input_file);
+    log_context("encode", input_file);
     uint32_t vadpcm_frame_count =
         audio.meta.padded_sample_count / kVADPCMFrameSampleCount;
     void *vadpcm_data = XMALLOC(vadpcm_frame_count, kVADPCMFrameByteSize);
@@ -129,7 +129,7 @@ int cmd_encode(int argc, char **argv) {
     LOG_INFO("error level: %.2f dB", error_level);
     LOG_INFO("SNR: %.2f dB", signal_level - error_level);
 
-    log_context("write %s", output_file);
+    log_context("write", output_file);
     struct aiff_data aiff = {
         .version = kAIFFC,
         .version_timestamp = kAIFCVersion1,
