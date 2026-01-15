@@ -5,11 +5,8 @@
 
 #include <stdlib.h>
 
-static void alloc_failed(const char *file, int line, size_t nmemb, size_t size)
-    ATTRIBUTE((noreturn));
-
-static void alloc_failed(const char *file, int line, size_t nmemb,
-                         size_t size) {
+static _Noreturn void alloc_failed(const char *file, int line, size_t nmemb,
+                                   size_t size) {
     log_error(file, line, "allocation failed; nmemb=%zu, size=%zu", nmemb,
               size);
     exit(1);
