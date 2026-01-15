@@ -10,6 +10,10 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+// TODO: Parse "advanced" version of PCM type
+// 00000001 00 00 10 00 80 00 00 aa 00 38 9b 71 - PCM
+// 00000003 00 00 10 00 80 00 00 aa 00 38 9b 71 - Float
+
 int wave_parse(struct wave_data *restrict wave, const uint8_t *ptr,
                size_t size) {
     if (size < 12) {
