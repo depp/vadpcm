@@ -20,9 +20,16 @@ void *xmalloc(const char *file, int line, size_t nmemb, size_t size) {
         return NULL;
     }
     size_t total;
+#if __GNUC__
     if (__builtin_mul_overflow(nmemb, size, &total)) {
         goto error;
     }
+#else
+    total = nmemb * size;
+    if (total / size != nmemb) {
+        goto error;
+    }
+#endif
     void *ptr = malloc(total);
     if (ptr == NULL) {
         goto error;
