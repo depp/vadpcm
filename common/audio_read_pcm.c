@@ -114,7 +114,7 @@ static int audio_read_wave(struct audio_pcm *restrict audio,
     if (!audio_check_format(wave.channel_count, wave.bits_per_sample)) {
         goto error;
     }
-    uint32_t original_sample_count = wave.audio.size / 2;
+    uint32_t original_sample_count = (uint32_t)wave.audio.size / 2;
     uint32_t padded_sample_count =
         align32(original_sample_count, kVADPCMFrameSampleCount);
     int16_t *sample_data = XMALLOC(padded_sample_count, sizeof(*sample_data));

@@ -7,7 +7,11 @@
 #include "common/wave_internal.h"
 
 int wave_write(struct wave_data *restrict wave, const char *filename) {
-    uint32_t data_size = align32(wave->audio.size, 2);
+    if (wave->audio.size > 0xffffffff - 1) {
+        LOG_ERROR("audio data too large");
+        return -1;
+    }
+    uint32_t data_size = align32((uint32_t)wave->audio.size, 2);
 
     // 12 byte header
     // 8 + 16 byte fmt

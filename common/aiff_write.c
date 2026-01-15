@@ -64,7 +64,11 @@ int aiff_write(const struct aiff_data *restrict aiff, const char *filename) {
         }
         break;
     }
-    chunk_size[kChunkSSND] = 8 + aiff->audio.size;
+    if (aiff->audio.size > 0xffffffff - 8) {
+        LOG_ERROR("audio data too large");
+        return -1;
+    }
+    chunk_size[kChunkSSND] = 8 + (uint32_t)aiff->audio.size;
 
     // Calculate location of each chunk.
     uint32_t file_size = 12;
