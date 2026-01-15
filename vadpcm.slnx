@@ -4,4 +4,5 @@
     <Platform Name="x86" />
   </Configurations>
   <Project Path="codec/libvadpcm.vcxproj" Id="a994128f-5a22-4b29-84ab-d094f624848c" />
+  <Project Path="vadpcm/vadpcm.vcxproj" Id="8c36a277-993e-40de-8a70-f684f035a140" />
 </Solution>
