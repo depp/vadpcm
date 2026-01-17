@@ -63,8 +63,8 @@ vadpcm_error vadpcm_decode(int predictor_count, int order,
             // Accumulate the residual and predicted values.
             const struct vadpcm_vector *v = &predictor[order - 1];
             for (int k = 0; k < 8; k++) {
-                int residual = residuals[k] << scaling;
-                accumulator[k] += residual << 11;
+                int residual = residuals[k] * (1 << scaling);
+                accumulator[k] += residual * (1 << 11);
                 for (int i = 0; i < 7 - k; i++) {
                     accumulator[k + 1 + i] += residual * v->v[i];
                 }

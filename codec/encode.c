@@ -113,8 +113,9 @@ void vadpcm_encode_data(size_t frame_count, void *restrict dest,
             s0 = state[vector * 2];
             s1 = state[vector * 2 + 1];
             for (int i = 0; i < 8; i++) {
-                accumulator[i] = (src[frame * 16 + vector * 8 + i] << 11) -
-                                 s0 * pvec[0].v[i] - s1 * pvec[1].v[i];
+                accumulator[i] =
+                    (src[frame * 16 + vector * 8 + i] * (1 << 11)) -
+                    s0 * pvec[0].v[i] - s1 * pvec[1].v[i];
             }
             for (int i = 0; i < 8; i++) {
                 s = accumulator[i] >> 11;
@@ -161,7 +162,7 @@ void vadpcm_encode_data(size_t frame_count, void *restrict dest,
                     }
                     accumulator[i] = r;
                     // Update state to match decoder.
-                    int sout = r << shift;
+                    int sout = r * (1 << shift);
                     for (int j = 0; j < 7 - i; j++) {
                         accumulator[i + 1 + j] += sout * pvec[1].v[j];
                     }
