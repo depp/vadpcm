@@ -23,5 +23,5 @@ extern char *optarg;
 extern int optind;
 
 #else
-#include <getopt.h>
+#include <getopt.h> // IWYU pragma: export
 #endif
