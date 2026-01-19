@@ -68,7 +68,6 @@ static void log_msg(log_level level, const char *file, int line,
     }
     struct log_context ctx = g_log_context;
     if (ctx.operation != NULL) {
-        fputc(' ', stderr);
         fputs(ctx.operation, stderr);
         fputc(' ', stderr);
         fputs(ctx.path, stderr);
