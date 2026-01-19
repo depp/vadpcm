@@ -16,6 +16,13 @@ struct vadpcm_stats;
 void vadpcm_make_vectors(const double *restrict coeff,
                          struct vadpcm_vector *restrict vectors);
 
+// Create a codebook, given the frame autocorrelation matrixes and the
+// assignment from frames to predictors.
+void vadpcm_make_codebook(size_t frame_count, int predictor_count,
+                          const float (*restrict corr)[6],
+                          const uint8_t *restrict predictors,
+                          struct vadpcm_vector *restrict codebook);
+
 // Current state of the encoder. The state can be initialized to zero.
 struct vadpcm_encoder_state {
     int16_t data[2];

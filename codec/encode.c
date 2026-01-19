@@ -48,12 +48,10 @@ void vadpcm_make_vectors(const double *restrict coeff,
     }
 }
 
-// Create a codebook, given the frame autocorrelation matrixes and the
-// assignment from frames to predictors.
-static void vadpcm_make_codebook(size_t frame_count, int predictor_count,
-                                 const float (*restrict corr)[6],
-                                 const uint8_t *restrict predictors,
-                                 struct vadpcm_vector *restrict codebook) {
+void vadpcm_make_codebook(size_t frame_count, int predictor_count,
+                          const float (*restrict corr)[6],
+                          const uint8_t *restrict predictors,
+                          struct vadpcm_vector *restrict codebook) {
     double pcorr[kVADPCMMaxPredictorCount][6];
     int count[kVADPCMMaxPredictorCount];
     vadpcm_meancorrs(frame_count, predictor_count, corr, predictors, pcorr,

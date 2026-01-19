@@ -129,4 +129,12 @@ if(UNIX)
   if(MATH_LIBRARY)
     target_link_libraries(vadpcmstats ${MATH_LIBRARY})
   endif()
+
+  add_executable(statecheck
+    tests/statecheck.c
+  )
+  target_link_libraries(statecheck common vadpcm)
+  if(MATH_LIBRARY)
+    target_link_libraries(statecheck ${MATH_LIBRARY})
+  endif()
 endif()
