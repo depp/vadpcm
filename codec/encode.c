@@ -9,6 +9,7 @@
 #include "codec/vadpcm.h"
 
 #include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -83,12 +84,13 @@ void vadpcm_encode_data(size_t frame_count, void *restrict dest,
                         const int16_t *restrict src,
                         const uint8_t *restrict predictors,
                         const struct vadpcm_vector *restrict codebook,
-                        struct vadpcm_stats *restrict stats) {
-    uint32_t rng_state = 0;
+                        struct vadpcm_stats *restrict stats,
+                        struct vadpcm_encoder_state *restrict encoder_state) {
+    uint32_t rng_state = encoder_state->rng;
     uint8_t *destptr = dest;
     int state[4];
-    state[0] = 0;
-    state[1] = 0;
+    state[0] = encoder_state->data[0];
+    state[1] = encoder_state->data[1];
     stats->signal_mean_square = 0.0;
     stats->error_mean_square = 0.0;
     for (size_t frame = 0; frame < frame_count; frame++) {
@@ -190,6 +192,10 @@ void vadpcm_encode_data(size_t frame_count, void *restrict dest,
         state[1] = state[3];
         stats->error_mean_square += best_error;
     }
+    *encoder_state = (struct vadpcm_encoder_state){
+        .data = {state[0], state[1]},
+        .rng = rng_state,
+    };
     double factor = 1.0 / ((double)(frame_count * kVADPCMFrameSampleCount) *
                            (32768.0 * 32768.0));
     stats->signal_mean_square *= factor;
@@ -247,8 +253,9 @@ vadpcm_error vadpcm_encode(const struct vadpcm_params *restrict params,
 
         // Encode.
         struct vadpcm_stats stats_buf;
+        struct vadpcm_encoder_state encoder_state = {{0, 0}, 0};
         vadpcm_encode_data(frame_count, dest, src, predictors, codebook,
-                           stats != NULL ? stats : &stats_buf);
+                           stats != NULL ? stats : &stats_buf, &encoder_state);
     }
 
     free(corr);

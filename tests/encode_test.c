@@ -52,7 +52,9 @@ void test_reencode(const char *name, int predictor_count, int order,
     }
     adpcm2 = XMALLOC(frame_count, kVADPCMFrameByteSize);
     struct vadpcm_stats stats;
-    vadpcm_encode_data(frame_count, adpcm2, pcm1, predictors, codebook, &stats);
+    struct vadpcm_encoder_state encoder_state = {{0, 0}, 0};
+    vadpcm_encode_data(frame_count, adpcm2, pcm1, predictors, codebook, &stats,
+                       &encoder_state);
     pcm2 = XMALLOC(kVADPCMFrameSampleCount * frame_count, sizeof(int16_t));
     memset(&state, 0, sizeof(state));
     err = vadpcm_decode(predictor_count, order, codebook, &state, frame_count,

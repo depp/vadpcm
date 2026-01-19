@@ -16,9 +16,16 @@ struct vadpcm_stats;
 void vadpcm_make_vectors(const double *restrict coeff,
                          struct vadpcm_vector *restrict vectors);
 
+// Current state of the encoder. The state can be initialized to zero.
+struct vadpcm_encoder_state {
+    int16_t data[2];
+    uint32_t rng;
+};
+
 // Encode audio as VADPCM, given the assignment of each frame to a predictor.
 void vadpcm_encode_data(size_t frame_count, void *restrict dest,
                         const int16_t *restrict src,
                         const uint8_t *restrict predictors,
                         const struct vadpcm_vector *restrict codebook,
-                        struct vadpcm_stats *restrict stats);
+                        struct vadpcm_stats *restrict stats,
+                        struct vadpcm_encoder_state *restrict encoder_state);
