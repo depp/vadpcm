@@ -26,7 +26,8 @@ extern log_level g_log_level;
 void log_error(const char *file, int line, const char *fmt, ...)
     ATTRIBUTE((format(printf, 3, 4)));
 
-// Show an error message, with an error code from errno or GetLastError() appended.
+// Show an error message, with an error code from errno or GetLastError()
+// appended.
 void log_error_errno(const char *file, int line, int errcode, const char *fmt,
                      ...) ATTRIBUTE((format(printf, 4, 5)));
 
