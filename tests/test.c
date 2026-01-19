@@ -74,7 +74,7 @@ static void test_file(const char *name) {
     struct audio_vadpcm vadpcm;
     if (audio_read_vadpcm(&vadpcm, vadpcm_path) != 0) {
         test_failure_count++;
-        return;
+        goto cleanup1;
     }
     if (pcm.meta.original_sample_count != vadpcm.meta.original_sample_count) {
         LOG_ERROR(
@@ -89,6 +89,10 @@ static void test_file(const char *name) {
                 pcm.sample_data);
     test_reencode(name, vadpcm.codebook.predictor_count, vadpcm.codebook.order,
                   vadpcm.codebook.vector, frame_count, vadpcm.encoded_data);
+
+    audio_vadpcm_destroy(&vadpcm);
+cleanup1:
+    audio_pcm_destroy(&pcm);
 }
 
 int main(int argc, char **argv) {

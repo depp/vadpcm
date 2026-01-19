@@ -39,6 +39,9 @@ int audio_read_pcm(struct audio_pcm *restrict audio, const char *filename,
 int audio_write_pcm(struct audio_pcm *restrict audio, const char *filename,
                     file_format format);
 
+// Destroy PCM if it was returned from audio_read_pcm().
+void audio_pcm_destroy(struct audio_pcm *restrict audio);
+
 // VADPCM-encoded audio data.
 struct audio_vadpcm {
     struct audio_meta meta;
@@ -49,3 +52,6 @@ struct audio_vadpcm {
 // Read VADPCM audio from a file.
 int audio_read_vadpcm(struct audio_vadpcm *restrict audio,
                       const char *filename);
+
+// Destroy VADPCM if it was returned from audio_read_vadpcm().
+void audio_vadpcm_destroy(struct audio_vadpcm *restrict audio);

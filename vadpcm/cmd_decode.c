@@ -108,6 +108,7 @@ int cmd_decode(int argc, char **argv) {
     }
 
     free(pcm_data);
+    audio_vadpcm_destroy(&audio);
     log_context_clear();
     return 0;
 }

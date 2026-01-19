@@ -67,7 +67,7 @@ static void collect_stats(struct vadpcm_params *params, const char *input_file,
     struct vadpcm_vector codebook[kVADPCMMaxPredictorCount];
     vadpcm_error err = vadpcm_encode(params, codebook, vadpcm_frame_count,
                                      vadpcm_data, audio.sample_data, stats);
-    free(audio.sample_data);
+    audio_pcm_destroy(&audio);
     free(vadpcm_data);
     if (err != 0) {
         LOG_ERROR("encoding failed: %s; file=%s", vadpcm_error_name(err),

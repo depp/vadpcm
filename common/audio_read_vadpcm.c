@@ -8,6 +8,7 @@
 #include "common/util.h"
 
 #include <inttypes.h>
+#include <stdlib.h>
 #include <string.h>
 
 int audio_read_vadpcm(struct audio_vadpcm *restrict audio,
@@ -70,4 +71,8 @@ int audio_read_vadpcm(struct audio_vadpcm *restrict audio,
 error:
     input_file_destroy(&input);
     return -1;
+}
+
+void audio_vadpcm_destroy(struct audio_vadpcm *restrict audio) {
+    free(audio->encoded_data);
 }

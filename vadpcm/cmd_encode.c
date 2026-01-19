@@ -156,7 +156,7 @@ int cmd_encode(int argc, char **argv) {
         return 1;
     }
 
-    free(audio.sample_data);
+    audio_pcm_destroy(&audio);
     free(vadpcm_data);
     log_context_clear();
     return 0;

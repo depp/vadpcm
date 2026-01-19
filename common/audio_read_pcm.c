@@ -12,6 +12,7 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 
 static bool audio_check_format(int channel_count, int sample_size) {
@@ -150,4 +151,8 @@ int audio_read_pcm(struct audio_pcm *restrict audio, const char *filename,
         LOG_ERROR("unknown format");
         return -1;
     }
+}
+
+void audio_pcm_destroy(struct audio_pcm *restrict audio) {
+    free(audio->sample_data);
 }
