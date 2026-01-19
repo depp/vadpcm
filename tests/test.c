@@ -105,6 +105,7 @@ int main(int argc, char **argv) {
     test_extensions();
     test_extended();
     test_wave();
+    test_encode_1();
     for (int i = 0; kAIFFNames[i] != NULL; i++) {
         test_file(kAIFFNames[i]);
     }

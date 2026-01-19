@@ -27,6 +27,9 @@ void test_reencode(const char *name, int predictor_count, int order,
                    struct vadpcm_vector *codebook, size_t frame_count,
                    const void *vadpcm);
 
+// Test for specific encoding problems.
+void test_encode_1(void);
+
 // Autocorrelation test.
 void test_autocorr(void);
 

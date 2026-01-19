@@ -2,6 +2,7 @@
 // This file is part of VADPCM. VADPCM is licensed under the terms of the
 // Mozilla Public License, version 2.0. See LICENSE.txt for details.
 #include "codec/encode.h"
+#include "codec/vadpcm.h"
 #include "common/util.h"
 #include "tests/test.h"
 
@@ -89,4 +90,83 @@ done:
     free(pcm2);
     free(adpcm2);
     free(predictors);
+}
+
+struct frame_params {
+    int16_t input[16];
+    struct vadpcm_vector predictor[2];
+    struct vadpcm_encoder_state state;
+};
+
+struct frame_result {
+    uint8_t output[9];
+    int16_t decoded[16];
+    vadpcm_error error;
+    int16_t estate[2];
+    int16_t dstate[2];
+};
+
+static void encode_frame(const struct frame_params *params,
+                         struct frame_result *result) {
+    static const uint8_t zero = 0;
+    struct vadpcm_stats stats;
+    struct vadpcm_encoder_state encoder_state = params->state;
+    vadpcm_encode_data(1, result->output, params->input, &zero,
+                       params->predictor, &stats, &encoder_state);
+    struct vadpcm_vector state;
+    state.v[6] = params->state.data[0];
+    state.v[7] = params->state.data[1];
+    result->error = vadpcm_decode(1, 2, params->predictor, &state, 1,
+                                  result->decoded, result->output);
+    for (int i = 0; i < 2; i++) {
+        result->estate[i] = encoder_state.data[i];
+        result->dstate[i] = state.v[6 + i];
+    }
+}
+
+void test_encode_1(void) {
+    static const struct frame_params params = {
+        .input = {27791, 29047, 30145, 31078, 31825, 32364, 32677, 32759, 32619,
+                  32281, 31779, 31125, 30314, 29324, 28115, 26647},
+        .predictor =
+            {
+                {{-2036, -4055, -6050, -8016, -9948, -11839, -13685, -15481}},
+                {{4078, 6085, 8063, 10005, 11908, 13764, 15570, 17321}},
+            },
+        .state = {{24842, 26391}, 0x4b1f5080},
+    };
+    struct frame_result result;
+    encode_frame(&params, &result);
+    if (result.error != 0) {
+        fprintf(stderr, "test_encode_1: %s", vadpcm_error_name(result.error));
+        test_failure_count++;
+        return;
+    }
+
+    if (result.estate[0] != result.dstate[0] ||
+        result.estate[1] != result.dstate[1]) {
+        fputs("Error: state mismatch\n", stderr);
+        test_failure_count++;
+
+        fprintf(stderr, "EState: %d %d\n", result.estate[0], result.estate[1]);
+        fprintf(stderr, "DState: %d %d\n", result.dstate[0], result.dstate[1]);
+
+        fputs("Input: ", stderr);
+        for (int i = 0; i < 16; i++) {
+            fprintf(stderr, " %7d", params.input[i]);
+        }
+        fputc('\n', stderr);
+
+        fputs("Output:", stderr);
+        for (int i = 0; i < 16; i++) {
+            fprintf(stderr, " %7d", result.decoded[i]);
+        }
+        fputc('\n', stderr);
+
+        fputs("Encoded:", stderr);
+        for (int i = 0; i < 9; i++) {
+            fprintf(stderr, " %02x", result.output[i]);
+        }
+        fputc('\n', stderr);
+    }
 }
