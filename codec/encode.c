@@ -161,12 +161,19 @@ void vadpcm_encode_data(size_t frame_count, void *restrict dest,
                         r = -8;
                     }
                     accumulator[i] = r;
-                    // Update state to match decoder.
+                    // Update state to match decoder. The accumulator has
+                    // 32-bit precision, but the state carried from vector to
+                    // vector is just the 16-bit output values.
                     int sout = r * (1 << shift);
                     for (int j = 0; j < 7 - i; j++) {
                         accumulator[i + 1 + j] += sout * pvec[1].v[j];
                     }
                     sout += a;
+                    if (sout > 0x7fff) {
+                        sout = 0x7fff;
+                    } else if (sout < -0x8000) {
+                        sout = -0x8000;
+                    }
                     s0 = s1;
                     s1 = sout;
                     // Track encoding error.
